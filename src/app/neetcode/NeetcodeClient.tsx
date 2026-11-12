@@ -8,7 +8,7 @@ import { NEETCODE_TREE, NODE_H, NODE_W, TREE_H, TREE_W } from "@/lib/neetcodeTre
 export type NcItem = { id: number; pos: number; title: string; url: string; difficulty: string | null; solved: boolean; last: string | null | undefined };
 export type NcTopic = { name: string; items: NcItem[] };
 
-const GREEN = "#2e9d57", ORANGE = "#d99a00";
+const GREEN = "#6aa56f", ORANGE = "#c49a45";
 
 export default function NeetcodeClient({ topics, nextId }: { topics: NcTopic[]; nextId: number | null }) {
   const [view, setView] = useState<"tree" | "list">("tree");
@@ -40,7 +40,7 @@ export default function NeetcodeClient({ topics, nextId }: { topics: NcTopic[]; 
         {(["Easy", "Medium", "Hard"] as const).map((d) => { const s = byDiff(d); return <div key={d} className="text-center"><div className="text-sm" style={{ color: diffColor(d) }}>{d}</div><div className="font-mono text-xl font-bold">{s.solved}/{s.total}</div></div>; })}
         <div className="flex gap-1 rounded-xl border border-line p-1">
           {(["tree", "list"] as const).map((v) => (
-            <button key={v} onClick={() => pick(v)} className={`rounded-lg px-4 py-1.5 text-sm capitalize ${view === v ? "bg-accent font-semibold text-white" : "text-mute hover:text-ink"}`}>{v === "tree" ? "🌳 Tree" : "☰ List"}</button>
+            <button key={v} onClick={() => pick(v)} className={`rounded-lg px-4 py-1.5 text-sm capitalize ${view === v ? "bg-accent font-semibold text-[#10243a]" : "text-mute hover:text-ink"}`}>{v === "tree" ? "🌳 Tree" : "☰ List"}</button>
           ))}
         </div>
       </div>
@@ -79,7 +79,7 @@ function TreeView({ topics, solved, nextId, toggle }: { topics: NcTopic[]; solve
         <svg viewBox={`0 0 ${TREE_W} ${TREE_H}`} className="h-auto w-full">
           <defs>
             <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-              <path d="M0 0 L10 5 L0 10 z" fill="#d0d0cc" />
+              <path d="M0 0 L10 5 L0 10 z" fill="#555555" />
             </marker>
             <marker id="arrowOn" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
               <path d="M0 0 L10 5 L0 10 z" fill={GREEN} />
@@ -92,24 +92,24 @@ function TreeView({ topics, solved, nextId, toggle }: { topics: NcTopic[]; solve
             const x1 = a.x, y1 = a.y + NODE_H / 2, x2 = n.x, y2 = n.y - NODE_H / 2 - 3;
             const my = (y1 + y2) / 2;
             const on = stat(p).complete;
-            return <path key={`${p}-${n.topic}`} d={`M${x1} ${y1} C${x1} ${my} ${x2} ${my} ${x2} ${y2}`} fill="none" stroke={on ? GREEN : "#d0d0cc"} strokeWidth={on ? 2.5 : 2} markerEnd={on ? "url(#arrowOn)" : "url(#arrow)"} opacity={on ? 0.9 : 1} />;
+            return <path key={`${p}-${n.topic}`} d={`M${x1} ${y1} C${x1} ${my} ${x2} ${my} ${x2} ${y2}`} fill="none" stroke={on ? GREEN : "#555555"} strokeWidth={on ? 2.5 : 2} markerEnd={on ? "url(#arrowOn)" : "url(#arrow)"} opacity={on ? 0.9 : 1} />;
           }))}
           {/* nodes */}
           {NEETCODE_TREE.map((n) => {
             const s = stat(n.topic);
             const locked = missing(n.topic).length > 0 && s.n === 0;
-            const color = s.complete ? GREEN : s.n > 0 ? ORANGE : "#9a9ea5";
+            const color = s.complete ? GREEN : s.n > 0 ? ORANGE : "#747070";
             const isNext = n.topic === nextTopic, isSel = n.topic === sel;
             const x = n.x - NODE_W / 2, y = n.y - NODE_H / 2;
             return (
               <g key={n.topic} onClick={() => setSel(n.topic)} className="cursor-pointer" opacity={locked ? 0.55 : 1}>
                 {isNext && <rect x={x - 4} y={y - 4} width={NODE_W + 8} height={NODE_H + 8} rx={18} fill={ORANGE} opacity={0.45} filter="url(#glow)" />}
-                <rect x={x} y={y} width={NODE_W} height={NODE_H} rx={14} fill={s.complete ? "#e9f5ee" : "#f0f0ed"}
-                  stroke={isSel ? "#1f2328" : color} strokeWidth={isSel ? 2.5 : 1.8} strokeDasharray={locked ? "6 5" : undefined} />
-                <text x={n.x} y={y + 25} textAnchor="middle" fontSize="15" fontWeight="700" fill="#1f2328">{n.short ?? n.topic}</text>
-                <rect x={x + 16} y={y + 40} width={NODE_W - 70} height={7} rx={3.5} fill="#e3e3df" />
+                <rect x={x} y={y} width={NODE_W} height={NODE_H} rx={14} fill={s.complete ? "#34413a" : "#3a3a3a"}
+                  stroke={isSel ? "#d0cece" : color} strokeWidth={isSel ? 2.5 : 1.8} strokeDasharray={locked ? "6 5" : undefined} />
+                <text x={n.x} y={y + 25} textAnchor="middle" fontSize="15" fontWeight="700" fill="#d0cece">{n.short ?? n.topic}</text>
+                <rect x={x + 16} y={y + 40} width={NODE_W - 70} height={7} rx={3.5} fill="#404040" />
                 <rect x={x + 16} y={y + 40} width={(NODE_W - 70) * (s.total ? s.n / s.total : 0)} height={7} rx={3.5} fill={color} />
-                <text x={x + NODE_W - 14} y={y + 48} textAnchor="end" fontSize="12" fill="#6b6f76" fontFamily="monospace">{s.n}/{s.total}</text>
+                <text x={x + NODE_W - 14} y={y + 48} textAnchor="end" fontSize="12" fill="#9f9999" fontFamily="monospace">{s.n}/{s.total}</text>
                 {s.complete && <text x={x + NODE_W - 12} y={y + 20} textAnchor="end" fontSize="14" fill={GREEN}>✓</text>}
                 <title>{locked ? `Do first: ${missing(n.topic).join(", ")}` : n.topic}</title>
               </g>
@@ -197,13 +197,13 @@ function Topic({ t, open, onToggle, solved, nextId, toggle }: { t: NcTopic; open
 
 function Row({ i, solved, next, toggle }: { i: NcItem; solved: boolean; next: boolean; toggle: (id: number) => void }) {
   return (
-    <div className={`flex items-center gap-3 border-b border-[#efefec] px-5 py-2.5 last:border-0 ${next ? "bg-accent-soft" : ""}`}>
+    <div className={`flex items-center gap-3 border-b border-[#3a3a3a] px-5 py-2.5 last:border-0 ${next ? "bg-accent-soft" : ""}`}>
       <button title={solved ? "Marked solved, click to unmark" : "Mark as solved"} onClick={() => toggle(i.id)}
         className={`grid h-6 w-6 shrink-0 place-items-center rounded-md border text-xs ${solved ? "border-green bg-green text-white" : "border-line text-transparent hover:border-green/60"}`}>✓</button>
       <span className="w-8 text-right font-mono text-xs text-dim">{i.pos}</span>
       <a href={i.url} target="_blank" rel="noreferrer" className="min-w-0 flex-1 truncate hover:text-accent">{i.title}</a>
       {next && <span className="chip !text-xs text-accent">next</span>}
-      {i.last !== undefined && <span className="h-2 w-2 rounded-full" title={RESULT_LABEL[i.last ?? ""]} style={{ background: RESULT_COLOR[i.last ?? ""] ?? "#9a9ea5" }} />}
+      {i.last !== undefined && <span className="h-2 w-2 rounded-full" title={RESULT_LABEL[i.last ?? ""]} style={{ background: RESULT_COLOR[i.last ?? ""] ?? "#747070" }} />}
       <span className="w-16 text-right text-xs" style={{ color: diffColor(i.difficulty) }}>{i.difficulty}</span>
       <TrainThis id={i.id} url={i.url} />
     </div>

@@ -151,9 +151,9 @@ export default function SettingsClient({ settings, secrets, accounts, log: initi
         </div>
         <datalist id="tzs">{["Asia/Bangkok", "UTC", "Europe/London", "Europe/Berlin", "America/New_York", "America/Los_Angeles", "Asia/Tokyo", "Asia/Dubai", "Asia/Riyadh", "Asia/Kolkata"].map((t) => <option key={t} value={t} />)}</datalist>
         <div className="mt-5 grid gap-4 md:grid-cols-3">
-          <Share label="NeetCode 250" color="#2f6fde" v={s.shareNeetcode} on={(v) => set("shareNeetcode", v)} />
-          <Share label="Codeforces" color="#2e9d57" v={s.shareCodeforces} on={(v) => set("shareCodeforces", v)} />
-          <Share label="CSES" color="#2f6fde" v={s.shareCses} on={(v) => set("shareCses", v)} />
+          <Share label="NeetCode 250" color="#4ba0f2" v={s.shareNeetcode} on={(v) => set("shareNeetcode", v)} />
+          <Share label="Codeforces" color="#6aa56f" v={s.shareCodeforces} on={(v) => set("shareCodeforces", v)} />
+          <Share label="CSES" color="#4ba0f2" v={s.shareCses} on={(v) => set("shareCses", v)} />
         </div>
         {shareSum !== 100 && <div className="mt-2 text-sm text-amber">Shares add up to {shareSum}% — they're normalized, but 100% is easier to read.</div>}
         <div className="mt-5 grid gap-4 md:grid-cols-3">
@@ -248,7 +248,7 @@ export default function SettingsClient({ settings, secrets, accounts, log: initi
       <ResetCard onDone={() => { flash(true, "Progress reset. Fresh start!"); refreshHeader(); router.refresh(); }} onError={(m) => flash(false, m)} />
 
       <div className="fixed bottom-6 right-6 z-40 flex items-center gap-3">
-        {msg && <div className={`rounded-xl border px-4 py-2 text-sm shadow-xl ${msg.ok ? "border-green/50 bg-[#e9f5ee] text-green" : "border-red/50 bg-[#fbecec] text-red"}`}>{msg.text}</div>}
+        {msg && <div className={`rounded-xl border px-4 py-2 text-sm shadow-xl ${msg.ok ? "border-green/50 bg-[#34413a] text-green" : "border-red/50 bg-[#463434] text-red"}`}>{msg.text}</div>}
         <button className="btn btn-primary !px-8 !py-4 !text-lg shadow-2xl" onClick={save}>Save settings</button>
       </div>
     </div>

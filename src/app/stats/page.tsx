@@ -51,9 +51,9 @@ export default function StatsPage() {
       <div className="card grid grid-cols-2 divide-line md:grid-cols-3 xl:grid-cols-9 xl:divide-x">
         <Stat label="Hours" v={totals.hours} />
         <Stat label="Attempts" v={totals.attempts} />
-        <Stat label="Solved alone" v={totals.solved} color="#2e9d57" />
+        <Stat label="Solved alone" v={totals.solved} color="#6aa56f" />
         <Stat label="Re-solves" v={totals.resolves} />
-        <Stat label="Mastered" v={totals.retired} color="#2e9d57" />
+        <Stat label="Mastered" v={totals.retired} color="#6aa56f" />
         <Stat label="Avg. felt" v={totals.avgFelt} sub="/ 5" />
         <Stat label="NeetCode" v={trackProgress("neetcode250").solved} sub="/ 250" />
         <Stat label="CSES" v={cses.solved} sub={`/ ${cses.total}`} />

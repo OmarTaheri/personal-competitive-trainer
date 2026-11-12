@@ -35,8 +35,8 @@ export default function ContestStrip({ contests: initial, tz }: { contests: Cont
           const cs = contests.filter((c) => dayKey(c.startUtc, tz) === k);
           const date = new Date(d);
           return (
-            <button key={i} onClick={() => setSel(i)} className={`flex flex-col items-center rounded-md py-1 transition ${sel === i ? "bg-accent text-white" : "hover:bg-panel2"}`}>
-              <span className={`text-xs ${sel === i ? "text-white/75" : "text-mute"}`}>{date.toLocaleDateString(undefined, { weekday: "short", timeZone: tz })}</span>
+            <button key={i} onClick={() => setSel(i)} className={`flex flex-col items-center rounded-md py-1 transition ${sel === i ? "bg-accent text-[#10243a]" : "hover:bg-panel2"}`}>
+              <span className={`text-xs ${sel === i ? "text-[#10243a]/75" : "text-mute"}`}>{date.toLocaleDateString(undefined, { weekday: "short", timeZone: tz })}</span>
               <span className="num text-base font-semibold">{date.toLocaleDateString(undefined, { day: "numeric", timeZone: tz })}</span>
               <span className="mt-1 flex h-1.5 gap-0.5">
                 {cs.slice(0, 3).map((c) => <span key={c.id} className="h-1.5 w-1.5 rounded-full" style={{ background: sel === i ? "#fff" : PLATFORM_META[c.platform]?.color }} />)}

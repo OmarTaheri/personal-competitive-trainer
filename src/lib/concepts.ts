@@ -51,13 +51,10 @@ export const CONCEPTS: ConceptDef[] = [
   { id: "interactive", key: "IA", name: "Interactive", group: "Other" },
 ];
 
-/** Keyboard layout: each row is a list of groups, staggered like a real keyboard. */
+/** Keyboard layout: two staggered rows, each a list of groups. */
 export const KEYBOARD_ROWS: string[][] = [
-  ["Basics"],
-  ["Data structures"],
-  ["Search", "Trees"],
-  ["Graphs", "DP"],
-  ["Greedy", "Math", "Other"],
+  ["Basics", "Data structures", "Search", "Trees"],
+  ["Graphs", "DP", "Greedy", "Math", "Other"],
 ];
 
 export const CONCEPT_BY_ID = new Map(CONCEPTS.map((c) => [c.id, c]));

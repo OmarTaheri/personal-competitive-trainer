@@ -31,7 +31,7 @@ export default function Sidebar() {
   const path = usePathname();
   return (
     <aside className="flex h-dvh w-[4.5rem] shrink-0 flex-col items-center gap-1 border-r border-line bg-panel py-4">
-      <Link href="/" className="mb-3 grid h-9 w-9 place-items-center rounded-md bg-ink font-mono text-sm font-bold text-white" title="CP Training">
+      <Link href="/" className="mb-3 grid h-9 w-9 place-items-center rounded-md bg-panel2 font-mono text-sm font-bold text-ink" title="CP Training">
         {"</>"}
       </Link>
       {NAV.map((n) => {

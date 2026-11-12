@@ -16,7 +16,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
           <input name="password" type="password" autoComplete="current-password" required className="w-full rounded-md border border-line bg-panel2 px-3 py-2" />
         </label>
         {error && <p className="text-sm text-red">Wrong username or password.</p>}
-        <button type="submit" className="btn w-full !bg-accent !text-white">Sign in</button>
+        <button type="submit" className="btn btn-primary w-full">Sign in</button>
       </form>
     </div>
   );

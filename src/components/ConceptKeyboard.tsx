@@ -13,7 +13,7 @@ const STATUS_LABEL: Record<ConceptKey["status"], string> = { strong: "Strong", l
  * (red → yellow → green), grey keys are untried, and outlined keys are today's focus.
  * `highlight` (e.g. the concepts of the problem you just did) dims everything else.
  */
-export default function ConceptKeyboard({ keys, size = "lg", highlight, legend = true }: { keys: ConceptKey[]; size?: "lg" | "sm"; highlight?: string[]; legend?: boolean }) {
+export default function ConceptKeyboard({ keys, size = "lg", highlight, legend = true }: { keys: ConceptKey[]; size?: "lg" | "sm" | "xs"; highlight?: string[]; legend?: boolean }) {
   const [open, setOpen] = useState<string | null>(null);
   const root = useRef<HTMLDivElement>(null);
   const byGroup = new Map<string, ConceptKey[]>();
@@ -28,18 +28,20 @@ export default function ConceptKeyboard({ keys, size = "lg", highlight, legend =
     return () => { document.removeEventListener("mousedown", onDown); document.removeEventListener("keydown", onKey); };
   }, []);
 
-  const lg = size === "lg";
-  const keyCls = lg ? "h-[3.4rem] min-w-[3.4rem] text-[0.95rem]" : "h-10 min-w-10 text-xs";
+  const lg = size === "lg", xs = size === "xs";
+  // Two rows at most, so keys stay small (keybr's "All keys" strip is the xs size).
+  const keyCls = lg ? "h-9 min-w-[2.6rem] text-xs" : xs ? "h-[1.6rem] min-w-[2.1rem] text-[10px]" : "h-8 min-w-[2.3rem] text-[11px]";
+  const gap = xs ? "gap-[3px]" : "gap-1";
 
   return (
     <div ref={root} className="select-none">
-      <div className="flex justify-center"><div className={`flex flex-col items-start ${lg ? "gap-1.5" : "gap-1"}`}>
+      <div className={`flex overflow-x-auto scroll-thin ${xs ? "" : "justify-center"}`}><div className={`flex flex-col items-start ${gap}`}>
         {KEYBOARD_ROWS.map((groups, r) => (
-          <div key={r} className={`flex items-end ${lg ? "gap-5" : "gap-3"}`} style={{ marginLeft: `${r * (lg ? 1.1 : 0.7)}rem` }}>
+          <div key={r} className={`flex items-end ${xs ? "gap-2" : "gap-3"}`} style={{ marginLeft: `${r * (xs ? 0.6 : 1)}rem` }}>
             {groups.map((g) => (
               <div key={g} className="flex flex-col">
-                {lg && <span className="mb-0.5 pl-0.5 text-[10px] font-semibold uppercase tracking-wider text-dim">{g}</span>}
-                <div className={`flex ${lg ? "gap-1.5" : "gap-1"}`}>
+                {lg && <span className="mb-0.5 pl-0.5 text-[9px] font-semibold uppercase tracking-wider text-dim">{g}</span>}
+                <div className={`flex ${gap}`}>
                   {(byGroup.get(g) ?? []).map((k) => {
                     const dimmed = hl && !hl.has(k.id);
                     return (
@@ -48,16 +50,16 @@ export default function ConceptKeyboard({ keys, size = "lg", highlight, legend =
                           type="button"
                           onClick={() => setOpen(open === k.id ? null : k.id)}
                           title={k.name}
-                          className={`relative flex ${keyCls} flex-col items-center justify-center rounded-md px-1.5 font-mono font-semibold transition hover:-translate-y-px ${dimmed ? "opacity-30" : ""}`}
+                          className={`relative flex ${keyCls} flex-col items-center justify-center rounded px-1 font-mono font-semibold transition hover:-translate-y-px ${dimmed ? "opacity-30" : ""}`}
                           style={{
                             background: masteryColor(k.score, k.attempts),
-                            color: k.attempts ? "#1f2328cc" : C.dim,
-                            boxShadow: `inset 0 -2px 0 #0000001a${k.focus || hl?.has(k.id) ? `, 0 0 0 2px ${C.accent}` : ""}`,
+                            color: k.attempts ? "#e6e2e2" : C.dim,
+                            boxShadow: `inset 0 -2px 0 #00000040${k.focus || hl?.has(k.id) ? `, 0 0 0 2px ${C.accent}` : ""}`,
                           }}
                         >
                           {k.key}
-                          {k.status === "weak" && <span className="absolute bottom-1 left-1/2 h-[2px] w-4 -translate-x-1/2 rounded bg-red" />}
-                          {lg && k.attempts > 0 && <span className="absolute right-1 top-0.5 text-[9px] font-normal opacity-60">{k.attempts}</span>}
+                          {k.status === "weak" && <span className="absolute bottom-0.5 left-1/2 h-[2px] w-3 -translate-x-1/2 rounded bg-red" />}
+                          {lg && k.attempts > 0 && <span className="absolute right-0.5 top-0 text-[8px] font-normal opacity-60">{k.attempts}</span>}
                         </button>
                         {open === k.id && <KeyPopover k={k} />}
                       </div>
@@ -71,7 +73,7 @@ export default function ConceptKeyboard({ keys, size = "lg", highlight, legend =
       </div></div>
 
       {legend && (
-        <div className={`mt-4 flex flex-wrap items-center justify-center gap-x-5 gap-y-1 text-mute ${lg ? "text-xs" : "text-[11px]"}`}>
+        <div className={`mt-3 flex flex-wrap items-center justify-center gap-x-5 gap-y-1 text-mute ${lg ? "text-xs" : "text-[11px]"}`}>
           <span className="flex items-center gap-2">
             weak
             <span className="h-2 w-28 rounded-full" style={{ background: `linear-gradient(90deg, ${masteryColor(0.3, 1)}, ${masteryColor(0.6, 1)}, ${masteryColor(0.9, 1)})` }} />
@@ -96,7 +98,7 @@ function KeyPopover({ k }: { k: ConceptKey }) {
         <Metric label="Tries" value={String(k.attempts)} />
         <Metric label="Status" value={STATUS_LABEL[k.status]} color={STATUS_COLOR[k.status]} small />
       </div>
-      <Link href={`/problems?concept=${k.id}&status=unsolved`} className="mt-3 block rounded-md bg-accent-soft px-2 py-1.5 text-center text-xs font-medium text-accent hover:bg-accent hover:text-white">
+      <Link href={`/problems?concept=${k.id}&status=unsolved`} className="mt-3 block rounded-md bg-accent-soft px-2 py-1.5 text-center text-xs font-medium text-accent hover:bg-accent hover:text-[#10243a]">
         Practice {k.name} →
       </Link>
     </div>

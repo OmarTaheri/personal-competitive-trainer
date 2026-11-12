@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { TrainView, HelpContent, Suggestion } from "@/lib/server/trainView";
-import { api, C, diffColor, PLATFORM_META, refreshHeader, RESULT_COLOR, RESULT_LABEL, SLOWED_BY } from "@/lib/ui";
+import { api, C, diffColor, masteryColor, PLATFORM_META, refreshHeader, RESULT_COLOR, RESULT_LABEL, SLOWED_BY } from "@/lib/ui";
 import ConceptKeyboard from "@/components/ConceptKeyboard";
 import { fmtDuration, fmtMinutes } from "@/lib/time";
 
@@ -107,43 +107,66 @@ export default function TrainClient({ initial }: { initial: TrainView }) {
     return (
       <Screen top={top(() => router.push("/"))} drawers={drawers}>
         <h1 className="text-2xl font-semibold">Nothing left to suggest</h1>
-        <p className="mt-2 max-w-xl text-lg text-mute">Import Codeforces problems in Settings → Problem bank to unlock more.</p>
+        <p className="mt-2 max-w-xl text-mute">Import Codeforces problems in Settings → Problem bank to unlock more.</p>
       </Screen>
     );
   }
 
   const p = v.problem;
-  const meta = PLATFORM_META[p.platform];
-  const chips = (
-    <div className="flex flex-wrap items-center justify-center gap-2 text-sm">
-      <span className="chip font-semibold !text-white" style={{ background: meta.color, borderColor: meta.color }}>{meta.label}</span>
-      <span className="chip">{p.track}</span>
-      <Difficulty p={p} />
-      <span className="chip num">~{p.expectedMin} min</span>
-    </div>
+  const doneCount = v.suggestions.filter((s) => s.state === "done").length;
+  const focus = v.keys.filter((k) => k.focus);
+  const goalPct = Math.round((100 * v.queue.doneMin) / Math.max(1, v.queue.goalMin));
+  const info = (extra: React.ReactNode) => (
+    <InfoBlock>
+      <Row label="Metrics">
+        <Metric name="Today" value={fmtMinutes(v.queue.doneMin)} />
+        <Metric name="Problems" value={String(doneCount)} />
+        <Metric name="Left" value={`${v.queue.left}`} note={`~${fmtMinutes(v.suggestions.filter((s) => s.state !== "done").reduce((m, s) => m + s.expectedMin, 0))}`} />
+      </Row>
+      <Row label="All concepts">
+        <ConceptKeyboard keys={v.keys} size="xs" legend={false} highlight={!a ? v.last?.concepts : undefined} />
+      </Row>
+      <Row label="Focus">
+        {focus.length ? focus.map((k) => (
+          <span key={k.id} className="mr-4 inline-flex items-center gap-2">
+            <span className="rounded px-1.5 py-0.5 font-mono text-xs font-semibold text-[#e6e2e2]" style={{ background: masteryColor(k.score, k.attempts), boxShadow: `0 0 0 1px ${C.accent}` }}>{k.key}</span>
+            <span>{k.name}</span>
+            <span className="num text-sm text-mute">{k.attempts ? `${Math.round((k.score ?? 0) * 100)} · ${k.attempts} tries` : "new"}</span>
+          </span>
+        )) : <span className="text-mute">No focus concepts today, the plan mixes everything.</span>}
+      </Row>
+      {extra}
+      <Row label="Daily goal">
+        <span className="num text-sm text-mute">{goalPct}%/{v.queue.goalMin} minutes</span>
+        <span className="ml-4 inline-block h-2.5 w-[min(28rem,40vw)] overflow-hidden rounded-sm border border-[#555] bg-[#2b2b2b] align-middle">
+          <span className={`block h-full ${goalPct >= 100 ? "bg-green" : "bg-[#6c6666]"}`} style={{ width: `${Math.min(100, goalPct)}%` }} />
+        </span>
+        {goalPct >= 100 && <span className="ml-3 text-sm text-green">bonus round</span>}
+      </Row>
+    </InfoBlock>
   );
 
   // ----------------------------------------------------- next problem
   if (!a) {
+    const start = () => { if (!busy) act({ action: "start", problemId: p.id }); };
     return (
-      <Screen top={top(() => router.push("/"))} drawers={drawers}>
-        {chips}
-        <div className="eyebrow mt-[3vh] !tracking-[0.25em]">Next problem</div>
-        <Title text={p.title} href={p.url} />
-        <Tags p={p} />
-        <button
-          className="btn btn-primary mt-[5vh] !px-14 !py-[1.8vh] !text-2xl"
-          disabled={busy}
-          onClick={() => act({ action: "start", problemId: p.id })}
-        >
-          Start
-        </button>
-        <div className="mt-3 text-sm text-mute">Starts the timer. Click the problem name to open it in a new tab.</div>
+      <Screen top={top(() => router.push("/"))} drawers={drawers} keys={{ " ": start, Enter: start }}>
+        {info(
+          <Row label="Last problem">
+            {v.last ? <span>{v.last.title} <span className="text-sm text-mute">· its concepts are outlined above</span></span> : <span className="text-mute">Nothing finished yet today.</span>}
+          </Row>,
+        )}
+        <ProblemLine p={p} label="Next problem" />
+        <Pad>
+          <PadRow>
+            <PadKey hint="↗" label="Open problem" grow onClick={() => window.open(p.url, "_blank", "noreferrer")} />
+            <PadKey hint="☰" label="Today's suggestions" grow onClick={() => setPanel("suggestions")} />
+          </PadRow>
+          <PadRow>
+            <PadKey hint="space / enter" label="Start (starts the timer)" color={C.accent} filled grow={4} big disabled={busy} onClick={start} />
+          </PadRow>
+        </Pad>
         {err && <ErrorBox msg={err} />}
-        <div className="mt-[5vh] w-full max-w-4xl border-t border-line pt-[3vh]">
-          <div className="eyebrow mb-3">{v.last ? <>Your concepts · just practiced in <span className="normal-case tracking-normal text-ink">{v.last.title}</span></> : "Your concepts"}</div>
-          <ConceptKeyboard keys={v.keys} size="sm" highlight={v.last?.concepts} />
-        </div>
       </Screen>
     );
   }
@@ -162,40 +185,49 @@ export default function TrainClient({ initial }: { initial: TrainView }) {
   const total = think + stuck + code;
   const overExpected = total / 60 > p.expectedMin;
   const pm = PHASE_META[phase];
+  const go = (ph: Phase) => () => { if (!busy && phase !== ph) act({ action: "phase", id: a.id, phase: ph }); };
+  const pauseResume = () => { if (busy) return; if (phase === "paused") act({ action: "resume", id: a.id }); else act({ action: "phase", id: a.id, phase: "paused" }); };
+  const finish = (result: "solved" | "solved_help" | "gave_up") => () => { if (!busy) act({ action: "finish", id: a.id, result }); };
+  const solved = finish(a.helpUsed === "none" ? "solved" : "solved_help");
 
   return (
-    <Screen top={top(quit)} drawers={drawers}>
-      {chips}
-      <div className="mt-[2vh] flex items-center gap-3">
-        <span className={`h-2.5 w-2.5 rounded-full ${running ? "animate-pulse" : ""}`} style={{ background: pm.color }} />
-        <span className="text-base font-medium" style={{ color: pm.color }}>{pm.label}</span>
-      </div>
-      <Title text={p.title} href={p.url} />
-      <Tags p={p} />
-
-      <div className={`num mt-[2vh] font-semibold leading-none ${overExpected ? "text-red" : "text-ink"}`} style={{ fontSize: "clamp(3.5rem, 12vh, 8rem)" }}>{fmtDuration(total)}</div>
-      <PhaseBar think={think} stuck={stuck} code={code} />
-
-      <div className="mt-[3vh] flex flex-wrap justify-center gap-3">
-        {phase !== "paused" ? (
-          <>
-            {phase !== "stuck" && <button className="btn !border-red/50 !px-6 !py-[1.3vh] !text-lg text-red" disabled={busy} onClick={() => act({ action: "phase", id: a.id, phase: "stuck" })}>I&apos;m stuck</button>}
-            {phase !== "code" && <button className="btn !border-green/50 !px-6 !py-[1.3vh] !text-lg text-green" disabled={busy} onClick={() => act({ action: "phase", id: a.id, phase: "code" })}>{phase === "stuck" ? "Got it, coding" : "Start coding"}</button>}
-            {phase !== "think" && <button className="btn !border-accent/50 !px-6 !py-[1.3vh] !text-lg text-accent" disabled={busy} onClick={() => act({ action: "phase", id: a.id, phase: "think" })}>Thinking</button>}
-            <button className="btn !px-6 !py-[1.3vh] !text-lg" disabled={busy} onClick={() => act({ action: "phase", id: a.id, phase: "paused" })}>Pause</button>
-          </>
-        ) : (
-          <button className="btn btn-primary !px-12 !py-[1.6vh] !text-xl" disabled={busy} onClick={() => act({ action: "resume", id: a.id })}>Resume</button>
-        )}
-      </div>
-
-      <div className="mt-[3vh] grid w-full max-w-3xl grid-cols-3 gap-3">
-        <button className="btn btn-green !py-[2vh] !text-xl" disabled={busy} onClick={() => act({ action: "finish", id: a.id, result: a.helpUsed === "none" ? "solved" : "solved_help" })}>Solved</button>
-        <button className="btn !border-amber/60 !py-[2vh] !text-xl text-amber" disabled={busy} onClick={() => act({ action: "finish", id: a.id, result: "solved_help" })}>Solved with help</button>
-        <button className="btn !border-red/50 !py-[2vh] !text-xl text-red" disabled={busy} onClick={() => act({ action: "finish", id: a.id, result: "gave_up" })}>Gave up</button>
-      </div>
-
-      <div className="mt-[2vh] flex gap-6 text-xs text-dim">
+    <Screen top={top(quit)} drawers={drawers}
+      keys={{ t: go("think"), s: go("stuck"), c: go("code"), " ": pauseResume, "shift+Enter": solved, "shift+H": finish("solved_help"), "shift+G": finish("gave_up") }}>
+      {info(
+        <Row label="Phases">
+          <span className="num text-sm">
+            <span style={{ color: PHASE_META.think.color }}>think {fmtDuration(think)}</span>
+            <span className="mx-3 text-dim">·</span>
+            <span style={{ color: PHASE_META.stuck.color }}>stuck {fmtDuration(stuck)}</span>
+            <span className="mx-3 text-dim">·</span>
+            <span style={{ color: PHASE_META.code.color }}>code {fmtDuration(code)}</span>
+            <span className="ml-4 text-mute">expected ~{p.expectedMin}m</span>
+          </span>
+        </Row>,
+      )}
+      <ProblemLine p={p} label={
+        <span className="flex items-center gap-3">
+          <span className={`h-2 w-2 rounded-full ${running ? "animate-pulse" : ""}`} style={{ background: pm.color }} />
+          <span style={{ color: pm.color }}>{pm.label}</span>
+          <span className={`num text-2xl font-semibold ${overExpected ? "text-red" : "text-ink"}`}>{fmtDuration(total)}</span>
+        </span>
+      } />
+      <Pad>
+        <PadRow>
+          <PadKey hint="T" label="Thinking" color={PHASE_META.think.color} active={phase === "think"} grow disabled={busy} onClick={go("think")} />
+          <PadKey hint="S" label="I'm stuck" color={PHASE_META.stuck.color} active={phase === "stuck"} grow disabled={busy} onClick={go("stuck")} />
+          <PadKey hint="C" label={phase === "stuck" ? "Got it, coding" : "Coding"} color={PHASE_META.code.color} active={phase === "code"} grow disabled={busy} onClick={go("code")} />
+        </PadRow>
+        <PadRow>
+          <PadKey hint="⇧ enter" label="Solved" color={C.green} filled grow disabled={busy} onClick={solved} />
+          <PadKey hint="⇧ H" label="Solved with help" color={C.amber} filled grow disabled={busy} onClick={finish("solved_help")} />
+          <PadKey hint="⇧ G" label="Gave up" color={C.red} filled grow disabled={busy} onClick={finish("gave_up")} />
+        </PadRow>
+        <PadRow>
+          <PadKey hint="space" label={phase === "paused" ? "Resume" : "Pause"} color={phase === "paused" ? C.accent : "#8b4a47"} filled grow={4} big disabled={busy} onClick={pauseResume} />
+        </PadRow>
+      </Pad>
+      <div className="mt-3 flex justify-center gap-6 text-xs text-dim">
         <span>Auto-pauses after {v.settings.idlePauseMin} min idle.</span>
         <button className="hover:text-red" onClick={() => { if (confirmInline()) act({ action: "discard", id: a.id }); }}>Opened by mistake? Discard</button>
       </div>
@@ -206,11 +238,30 @@ export default function TrainClient({ initial }: { initial: TrainView }) {
 
 // ----------------------------------------------------------------------------- layout pieces
 
-function Screen({ top, drawers, children }: { top: React.ReactNode; drawers: React.ReactNode; children: React.ReactNode }) {
+type KeyMap = Record<string, () => void>;
+
+/** keybr-like page: info block, problem line, control pad, all in one left-aligned column. */
+function Screen({ top, drawers, keys, children }: { top: React.ReactNode; drawers: React.ReactNode; keys?: KeyMap; children: React.ReactNode }) {
+  const ref = useRef(keys);
+  ref.current = keys;
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const t = e.target as HTMLElement;
+      if (e.repeat || e.ctrlKey || e.metaKey || e.altKey || t.closest("input, textarea, select, [contenteditable]")) return;
+      const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+      const name = e.shiftKey ? `shift+${e.key.length === 1 ? e.key.toUpperCase() : e.key}` : k;
+      const fn = ref.current?.[name];
+      if (fn) { e.preventDefault(); fn(); }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
   return (
     <div className="relative flex h-dvh flex-col overflow-hidden">
       <div className="relative">{top}</div>
-      <div className="relative flex min-h-0 flex-1 flex-col items-center justify-center overflow-y-auto px-8 pb-6 text-center scroll-thin">{children}</div>
+      <div className="relative min-h-0 flex-1 overflow-y-auto px-8 pb-8 scroll-thin">
+        <div className="mx-auto flex w-full max-w-5xl flex-col pt-[3vh]">{children}</div>
+      </div>
       {drawers}
     </div>
   );
@@ -218,36 +269,91 @@ function Screen({ top, drawers, children }: { top: React.ReactNode; drawers: Rea
 
 function TopBar({ doneMin, goalMin, bonus, onSuggestions, onQuit, helpCount, onHelp }: { doneMin: number; goalMin: number; bonus: boolean; onSuggestions: () => void; onQuit: () => void; helpCount: number; onHelp: () => void }) {
   return (
-    // Equal side columns so the middle stays exactly centred, in line with the title.
-    <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4 border-b border-line bg-panel px-6 py-2.5">
-      <button className="btn btn-ghost !px-3 justify-self-start text-mute" onClick={onQuit} title="Quit training">← Quit</button>
-      <div className="flex items-center gap-1.5 text-sm text-mute">
-        <span className="num font-semibold text-ink">{fmtMinutes(doneMin)}</span>
-        <span>/ {fmtMinutes(goalMin)} today</span>
-        {bonus && <span className="ml-2 text-xs text-green">goal done · bonus round</span>}
-      </div>
-      <div className="flex items-center gap-2 justify-self-end">
-        {helpCount > 0 && <button className="btn !py-1.5 !text-sm !border-amber/50 text-amber" onClick={onHelp}>Help</button>}
-        <button className="btn !py-1.5 !text-sm" onClick={onSuggestions}>Today&apos;s suggestions</button>
+    <div className="flex items-center gap-4 px-6 py-3">
+      <button className="btn btn-ghost !px-3 text-mute" onClick={onQuit} title="Quit training">← Quit</button>
+      <span className="num text-sm text-dim">{fmtMinutes(doneMin)} / {fmtMinutes(goalMin)} today{bonus ? " · goal done" : ""}</span>
+      <div className="ml-auto flex items-center gap-2">
+        {helpCount > 0 && <button className="btn btn-ghost !py-1.5 !text-sm text-amber" onClick={onHelp}>Help</button>}
+        <button className="btn btn-ghost !py-1.5 !text-sm text-mute" onClick={onSuggestions}>Today&apos;s suggestions</button>
       </div>
     </div>
   );
 }
 
-function Title({ text, href }: { text: string; href?: string }) {
-  const cls = "mt-[1.5vh] block max-w-6xl font-semibold leading-[1.08] tracking-tight";
-  const style = { fontSize: text.length > 40 ? "clamp(2rem, 4.4vw, 3.6rem)" : "clamp(2.4rem, 5.6vw, 4.8rem)" };
-  return href ? (
-    <a href={href} target="_blank" rel="noreferrer" className={`${cls} hover:text-accent`} style={style} title="Open in a new tab">
-      {text} <span className="align-middle text-[0.4em] text-mute">↗</span>
-    </a>
-  ) : <h1 className={cls} style={style}>{text}</h1>;
+function InfoBlock({ children }: { children: React.ReactNode }) {
+  return <div className="grid grid-cols-[auto_1fr] items-center gap-x-5 gap-y-3 text-[15px]">{children}</div>;
+}
+
+function Row({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <>
+      <div className="self-start whitespace-nowrap pt-0.5 text-right text-ink">{label}:</div>
+      <div className="min-w-0">{children}</div>
+    </>
+  );
+}
+
+function Metric({ name, value, note }: { name: string; value: string; note?: string }) {
+  return (
+    <span className="mr-6 inline-flex items-baseline gap-2">
+      <span className="text-ink">{name}:</span>
+      <span className="num text-sm text-mute">{value}{note && <span className="ml-1.5 text-dim">({note})</span>}</span>
+    </span>
+  );
+}
+
+/** The "lesson text": the problem title, big and monospace, with one quiet line of facts under it. */
+function ProblemLine({ p, label }: { p: NonNullable<TrainView["problem"]>; label: React.ReactNode }) {
+  const meta = PLATFORM_META[p.platform];
+  return (
+    <div className="mt-[5vh]">
+      <div className="mb-2 text-sm text-mute">{label}</div>
+      <a href={p.url} target="_blank" rel="noreferrer" title="Open in a new tab"
+        className="block font-mono leading-tight tracking-tight text-ink hover:text-accent"
+        style={{ fontSize: p.title.length > 40 ? "clamp(1.6rem, 3vw, 2.6rem)" : "clamp(2rem, 3.8vw, 3.2rem)" }}>
+        {p.title}<span className="ml-3 align-middle text-[0.45em] text-dim">↗</span>
+      </a>
+      <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-sm text-mute">
+        <span style={{ color: meta.color }}>{meta.label}</span>
+        <span className="text-dim">·</span>
+        <span>{p.track}</span>
+        <span className="text-dim">·</span>
+        <span style={{ color: diffColor(p.difficulty, p.rating) }}>{p.difficulty ?? (p.rating ? `${p.rating}` : "?")}</span>
+        <span className="text-dim">·</span>
+        <span>~{p.expectedMin} min</span>
+        {p.tags === null ? <><span className="text-dim">·</span><span className="text-dim">tags hidden (contest mode)</span></>
+          : p.tags.length > 0 && <><span className="text-dim">·</span><span className="text-dim">{p.tags.slice(0, 6).join(", ")}</span></>}
+      </div>
+    </div>
+  );
+}
+
+/** The control pad, drawn like a keyboard: rounded panel, rows of keys with their shortcut in the corner. */
+function Pad({ children }: { children: React.ReactNode }) {
+  return <div className="mx-auto mt-[5vh] w-full max-w-3xl rounded-xl bg-[#2b2b2b] p-3 shadow-[0_6px_24px_#00000055]"><div className="flex flex-col gap-2">{children}</div></div>;
+}
+function PadRow({ children }: { children: React.ReactNode }) {
+  return <div className="flex gap-2">{children}</div>;
+}
+function PadKey({ hint, label, color, active, filled, grow = 1, big, disabled, onClick }: {
+  hint: string; label: string; color?: string; active?: boolean; filled?: boolean; grow?: number | boolean; big?: boolean; disabled?: boolean; onClick: () => void;
+}) {
+  const on = active || filled;
+  const bg = on && color ? color : "#404040";
+  return (
+    <button type="button" disabled={disabled} onClick={(e) => { e.currentTarget.blur(); onClick(); }}
+      className={`relative flex min-w-0 flex-col justify-end rounded-md px-3 pb-2 pt-5 text-left transition hover:brightness-110 active:translate-y-px disabled:opacity-50 ${big ? "h-16" : "h-[4.2rem]"}`}
+      style={{ flexGrow: grow === true ? 1 : grow || 1, flexBasis: 0, background: on ? `color-mix(in srgb, ${bg} 75%, #333)` : bg, boxShadow: `inset 0 -3px 0 #00000045${active && color ? `, 0 0 0 2px ${color}` : ""}` }}>
+      <span className="absolute left-3 top-1.5 font-mono text-[11px] text-[#d0cece99]">{hint}</span>
+      <span className={`truncate ${big ? "text-center text-base" : "text-base"} ${on ? "font-semibold text-[#f0eeee]" : ""}`} style={{ color: on ? undefined : color ?? C.ink }}>{label}</span>
+    </button>
+  );
 }
 
 function Drawer({ open, title, onClose, children }: { open: boolean; title: string; onClose: () => void; children: React.ReactNode }) {
   return (
     <>
-      <div className={`absolute inset-0 z-40 bg-ink/20 transition-opacity ${open ? "opacity-100" : "pointer-events-none opacity-0"}`} onClick={onClose} />
+      <div className={`absolute inset-0 z-40 bg-black/50 transition-opacity ${open ? "opacity-100" : "pointer-events-none opacity-0"}`} onClick={onClose} />
       <aside className={`absolute right-0 top-0 z-50 flex h-full w-[min(480px,92vw)] flex-col border-l border-line bg-panel shadow-xl transition-transform ${open ? "translate-x-0" : "translate-x-full"}`}>
         <div className="flex items-center justify-between border-b border-line px-5 py-4">
           <div className="font-semibold">{title}</div>
@@ -313,41 +419,10 @@ function confirmInline() {
 function toast(msg: string) {
   const el = document.createElement("div");
   el.textContent = msg;
-  el.className = "fixed bottom-6 left-1/2 -translate-x-1/2 rounded-md bg-ink px-4 py-2 text-sm text-white shadow-lg z-50";
+  el.className = "fixed bottom-6 left-1/2 -translate-x-1/2 rounded-md border border-line bg-panel2 px-4 py-2 text-sm text-ink shadow-lg z-50";
   document.body.appendChild(el);
   setTimeout(() => el.remove(), 2500);
 }
-
-function Difficulty({ p }: { p: TrainView["problem"] & object }) {
-  const label = p.difficulty ?? (p.rating ? `${p.rating}` : "?");
-  const c = diffColor(p.difficulty, p.rating);
-  return <span className="chip font-semibold" style={{ color: c, borderColor: c + "66" }}>{label}</span>;
-}
-
-function Tags({ p }: { p: TrainView["problem"] & object }) {
-  if (p.tags === null) return <div className="mt-3 text-sm text-dim">Tags hidden (contest mode)</div>;
-  if (!p.tags.length) return null;
-  return <div className="mt-3 flex flex-wrap justify-center gap-2">{p.tags.slice(0, 6).map((t) => <span key={t} className="chip text-mute">{t}</span>)}</div>;
-}
-
-function PhaseBar({ think, stuck, code }: { think: number; stuck: number; code: number }) {
-  const t = think + stuck + code || 1;
-  return (
-    <div className="mt-[2vh] w-full max-w-2xl">
-      <div className="flex h-1.5 overflow-hidden rounded-full bg-line">
-        <div style={{ width: `${(100 * think) / t}%`, background: PHASE_META.think.color }} />
-        <div style={{ width: `${(100 * stuck) / t}%`, background: PHASE_META.stuck.color }} />
-        <div style={{ width: `${(100 * code) / t}%`, background: PHASE_META.code.color }} />
-      </div>
-      <div className="num mt-2 flex justify-center gap-6 text-sm">
-        <span style={{ color: PHASE_META.think.color }}>think {fmtDuration(think)}</span>
-        <span style={{ color: PHASE_META.stuck.color }}>stuck {fmtDuration(stuck)}</span>
-        <span style={{ color: PHASE_META.code.color }}>code {fmtDuration(code)}</span>
-      </div>
-    </div>
-  );
-}
-
 
 function ErrorBox({ msg }: { msg: string }) {
   return <div className="mt-4 rounded-md border border-red/40 bg-red-soft p-3 text-sm text-red">{msg}</div>;

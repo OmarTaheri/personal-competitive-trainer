@@ -43,10 +43,10 @@ export default async function ReviewPage({ searchParams }: { searchParams: Promi
         <>
           {/* headline numbers */}
           <div className="grid gap-4 md:grid-cols-4">
-            <Big label="Trained" value={fmtMinutes(r.trained)} sub={`of ${fmtMinutes(r.goal)} goal · ${pct}%`} color={pct >= 100 ? "#2e9d57" : "#2f6fde"} />
+            <Big label="Trained" value={fmtMinutes(r.trained)} sub={`of ${fmtMinutes(r.goal)} goal · ${pct}%`} color={pct >= 100 ? "#6aa56f" : "#4ba0f2"} />
             <Big label="Goal days hit" value={`${r.daysHit} / ${r.days.filter((d) => !d.future).length}`} sub="days you reached the goal" />
             <Big label="Problems" value={String(r.total)} sub={`${r.newCount} new · ${r.total - r.newCount} re-solves`} />
-            <Big label="Solved alone" value={r.total ? `${Math.round((100 * (r.results.solved ?? 0)) / r.total)}%` : "—"} sub="of everything you tried" color="#2e9d57" />
+            <Big label="Solved alone" value={r.total ? `${Math.round((100 * (r.results.solved ?? 0)) / r.total)}%` : "—"} sub="of everything you tried" color="#6aa56f" />
           </div>
 
           <div className="grid gap-5 xl:grid-cols-2">
@@ -58,7 +58,7 @@ export default async function ReviewPage({ searchParams }: { searchParams: Promi
                     <div className="text-xs tabular-nums text-mute">{d.future ? "" : fmtMinutes(d.minutes)}</div>
                     <div className="relative w-full flex-1">
                       <div className="absolute inset-x-0 border-t-2 border-dashed border-accent/50" style={{ bottom: `${(100 * d.goal) / maxMin}%` }} />
-                      <div className="absolute inset-x-1 bottom-0 rounded-t-lg" style={{ height: `${(100 * d.minutes) / maxMin}%`, background: d.minutes >= d.goal ? "#2e9d57" : "#2f6fde", opacity: d.future ? 0.2 : 1 }} />
+                      <div className="absolute inset-x-1 bottom-0 rounded-t-lg" style={{ height: `${(100 * d.minutes) / maxMin}%`, background: d.minutes >= d.goal ? "#6aa56f" : "#4ba0f2", opacity: d.future ? 0.2 : 1 }} />
                     </div>
                     <div className="text-xs text-mute">{fmtDay(d.date).split(",")[0].split(" ")[0]}</div>
                   </div>
@@ -86,8 +86,8 @@ export default async function ReviewPage({ searchParams }: { searchParams: Promi
             <Card title="Topics: this week vs the 4 weeks before">
               {!r.topics.length ? <Empty /> : (
                 <div className="grid gap-4 md:grid-cols-2">
-                  <TopicList title="📈 Got better" color="#2e9d57" items={improved} empty="No big jumps yet." />
-                  <TopicList title="📉 Got worse" color="#d64545" items={worse} empty="Nothing dropped. Nice." />
+                  <TopicList title="📈 Got better" color="#6aa56f" items={improved} empty="No big jumps yet." />
+                  <TopicList title="📉 Got worse" color="#c06060" items={worse} empty="Nothing dropped. Nice." />
                   {fresh.length > 0 && <div className="md:col-span-2 text-sm text-mute">New this week: {fresh.map((t) => `${t.name} (${t.score})`).join(", ")}</div>}
                   <div className="md:col-span-2 text-xs text-dim">Score = average result on that topic (alone 100, with help 50, gave up 0; lower if it felt hard or was slow). Changes of 10+ points are listed.</div>
                 </div>

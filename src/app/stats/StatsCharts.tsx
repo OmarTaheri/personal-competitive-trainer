@@ -2,8 +2,8 @@
 
 import { Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
-const tip = { contentStyle: { background: "#ffffff", border: "1px solid #e3e3df", borderRadius: 6, color: "#1f2328", fontSize: 12 }, labelStyle: { color: "#6b6f76" }, cursor: { fill: "#efefec" } };
-const STATUS_COLOR: Record<string, string> = { strong: "#2e9d57", learning: "#d99a00", weak: "#d64545", new: "#9a9ea5" };
+const tip = { contentStyle: { background: "#2e2e2e", border: "1px solid #404040", borderRadius: 6, color: "#d0cece", fontSize: 12 }, labelStyle: { color: "#9f9999" }, cursor: { fill: "#3a3a3a" } };
+const STATUS_COLOR: Record<string, string> = { strong: "#6aa56f", learning: "#c49a45", weak: "#c06060", new: "#747070" };
 
 export default function StatsCharts({ series, byRating, phases, slowed, mastery }: {
   series: { date: string; minutes: number; solved: number }[];
@@ -13,20 +13,20 @@ export default function StatsCharts({ series, byRating, phases, slowed, mastery 
   mastery: { name: string; score: number; attempts: number; status: string }[];
 }) {
   const phaseData = [
-    { name: "Thinking", value: Math.round(phases.think / 60), color: "#2f6fde" },
-    { name: "Stuck", value: Math.round(phases.stuck / 60), color: "#d64545" },
-    { name: "Coding", value: Math.round(phases.code / 60), color: "#2e9d57" },
+    { name: "Thinking", value: Math.round(phases.think / 60), color: "#4ba0f2" },
+    { name: "Stuck", value: Math.round(phases.stuck / 60), color: "#c06060" },
+    { name: "Coding", value: Math.round(phases.code / 60), color: "#6aa56f" },
   ];
   return (
     <div className="grid gap-6 xl:grid-cols-2">
       <Card title="Minutes per day (90 days)">
         <ResponsiveContainer width="100%" height={260}>
           <BarChart data={series} margin={{ left: -18 }}>
-            <CartesianGrid stroke="#e3e3df" vertical={false} />
-            <XAxis dataKey="date" tickFormatter={(d: string) => d.slice(5)} stroke="#9a9ea5" fontSize={11} minTickGap={24} tickLine={false} axisLine={false} />
-            <YAxis stroke="#9a9ea5" fontSize={11} tickLine={false} axisLine={false} />
+            <CartesianGrid stroke="#404040" vertical={false} />
+            <XAxis dataKey="date" tickFormatter={(d: string) => d.slice(5)} stroke="#747070" fontSize={11} minTickGap={24} tickLine={false} axisLine={false} />
+            <YAxis stroke="#747070" fontSize={11} tickLine={false} axisLine={false} />
             <Tooltip {...tip} />
-            <Bar dataKey="minutes" fill="#2f6fde" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="minutes" fill="#4ba0f2" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </Card>
@@ -34,14 +34,14 @@ export default function StatsCharts({ series, byRating, phases, slowed, mastery 
       <Card title="Results by rating (Codeforces scale)">
         <ResponsiveContainer width="100%" height={260}>
           <BarChart data={byRating} margin={{ left: -18 }}>
-            <CartesianGrid stroke="#e3e3df" vertical={false} />
-            <XAxis dataKey="rating" stroke="#9a9ea5" fontSize={11} tickLine={false} axisLine={false} />
-            <YAxis stroke="#9a9ea5" fontSize={11} tickLine={false} axisLine={false} allowDecimals={false} />
+            <CartesianGrid stroke="#404040" vertical={false} />
+            <XAxis dataKey="rating" stroke="#747070" fontSize={11} tickLine={false} axisLine={false} />
+            <YAxis stroke="#747070" fontSize={11} tickLine={false} axisLine={false} allowDecimals={false} />
             <Tooltip {...tip} />
             <Legend wrapperStyle={{ fontSize: 12 }} />
-            <Bar dataKey="solved" name="Solved" stackId="a" fill="#2e9d57" />
-            <Bar dataKey="help" name="With help" stackId="a" fill="#d99a00" />
-            <Bar dataKey="gaveUp" name="Gave up" stackId="a" fill="#d64545" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="solved" name="Solved" stackId="a" fill="#6aa56f" />
+            <Bar dataKey="help" name="With help" stackId="a" fill="#c49a45" />
+            <Bar dataKey="gaveUp" name="Gave up" stackId="a" fill="#c06060" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </Card>
@@ -80,9 +80,9 @@ export default function StatsCharts({ series, byRating, phases, slowed, mastery 
             <ResponsiveContainer width="100%" height={260}>
               <BarChart data={slowed} layout="vertical" margin={{ left: 40 }}>
                 <XAxis type="number" hide allowDecimals={false} />
-                <YAxis type="category" dataKey="name" stroke="#6b6f76" fontSize={11} width={110} tickLine={false} axisLine={false} />
+                <YAxis type="category" dataKey="name" stroke="#9f9999" fontSize={11} width={110} tickLine={false} axisLine={false} />
                 <Tooltip {...tip} />
-                <Bar dataKey="value" fill="#2f6fde" radius={[0, 4, 4, 0]} />
+                <Bar dataKey="value" fill="#4ba0f2" radius={[0, 4, 4, 0]} />
               </BarChart>
             </ResponsiveContainer>
           ) : <Empty />}

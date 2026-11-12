@@ -19,7 +19,7 @@ const fmtHM = (min: number) => `${String(Math.floor(min / 60) % 24).padStart(2, 
 const monthName = (d: string) => new Date(d + "T12:00:00Z").toLocaleDateString("en-US", { month: "long", timeZone: "UTC" });
 
 function colorOf(e: CalEvent) {
-  return e.kind === "training" ? "#2e9d57" : PLATFORM_META[e.platform]?.color ?? "#6b6f76";
+  return e.kind === "training" ? "#6aa56f" : PLATFORM_META[e.platform]?.color ?? "#9f9999";
 }
 
 export default function CalendarClient({ tz: tz0, initial, initialRange }: { tz: string; initial: CalEvent[]; initialRange: [number, number] }) {
@@ -83,7 +83,7 @@ export default function CalendarClient({ tz: tz0, initial, initialRange }: { tz:
         <div className="mx-auto text-2xl font-semibold">{title}</div>
         <div className="flex rounded-xl border border-line p-1">
           {(["day", "week", "month"] as const).map((v) => (
-            <button key={v} onClick={() => setView(v)} className={`rounded-lg px-4 py-1.5 capitalize ${view === v ? "bg-accent font-semibold text-white" : "text-mute hover:text-ink"}`}>{v}</button>
+            <button key={v} onClick={() => setView(v)} className={`rounded-lg px-4 py-1.5 capitalize ${view === v ? "bg-accent font-semibold text-[#10243a]" : "text-mute hover:text-ink"}`}>{v}</button>
           ))}
         </div>
         <select className="input !w-auto" value={tz} onChange={(e) => setTz(e.target.value)} title="Time zone (default from Settings)">
@@ -132,7 +132,7 @@ export default function CalendarClient({ tz: tz0, initial, initialRange }: { tz:
       )}
 
       {sel && (
-        <div className="fixed inset-0 z-50 grid place-items-center bg-ink/20" onClick={() => setSel(null)}>
+        <div className="fixed inset-0 z-50 grid place-items-center bg-black/50" onClick={() => setSel(null)}>
           <div className="card card-pad w-[26rem]" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center gap-2">
               <span className="h-3 w-3 rounded-full" style={{ background: colorOf(sel) }} />
@@ -181,14 +181,14 @@ function DayColumn({ date, isToday, events, tz, onSelect }: { date: string; isTo
 
   return (
     <div className="relative border-l border-line">
-      {Array.from({ length: 24 }, (_, h) => <div key={h} className="absolute inset-x-0 border-t border-[#f0f0ed]" style={{ top: h * HOUR_PX }} />)}
+      {Array.from({ length: 24 }, (_, h) => <div key={h} className="absolute inset-x-0 border-t border-[#3a3a3a]" style={{ top: h * HOUR_PX }} />)}
       {placed.map(({ e, top, bottom, lane }) => {
         const c = colorOf(e);
         const h = ((bottom - top) / 60) * HOUR_PX;
         return (
           <button key={e.id} onClick={() => onSelect(e)}
             className="absolute overflow-hidden rounded-lg border-l-4 px-2 py-1 text-left text-xs transition hover:brightness-125"
-            style={{ top: (top / 60) * HOUR_PX, height: Math.max(22, h - 2), left: `calc(${(100 * lane) / nLanes}% + 2px)`, width: `calc(${100 / nLanes}% - 4px)`, background: c + "26", borderColor: c, color: "#1f2328" }}>
+            style={{ top: (top / 60) * HOUR_PX, height: Math.max(22, h - 2), left: `calc(${(100 * lane) / nLanes}% + 2px)`, width: `calc(${100 / nLanes}% - 4px)`, background: c + "26", borderColor: c, color: "#d0cece" }}>
             <div className="truncate font-semibold" style={{ color: c }}>{e.kind === "training" ? "🏋 " : ""}{e.title}</div>
             {h > 34 && <div className="truncate text-mute">🕒 {fmtHM(top)} – {fmtHM(bottom)}</div>}
             {h > 54 && e.kind === "contest" && <div className="truncate text-mute">📍 {PLATFORM_META[e.platform]?.label}{e.joined ? " · joining ✓" : ""}</div>}
@@ -221,7 +221,7 @@ function MonthGrid({ anchor, today, events, tz, onSelect, onDay }: { anchor: str
           const inMonth = d.slice(0, 7) === anchor.slice(0, 7);
           return (
             <div key={d} className={`min-h-32 border-b border-l border-line p-1.5 ${inMonth ? "" : "opacity-40"}`}>
-              <button onClick={() => onDay(d)} className={`mb-1 grid h-7 w-7 place-items-center rounded-full text-sm ${d === today ? "bg-accent font-bold text-white" : "hover:bg-panel2"}`}>{Number(d.slice(8))}</button>
+              <button onClick={() => onDay(d)} className={`mb-1 grid h-7 w-7 place-items-center rounded-full text-sm ${d === today ? "bg-accent font-bold text-[#10243a]" : "hover:bg-panel2"}`}>{Number(d.slice(8))}</button>
               {contests.slice(0, 3).map((e) => (
                 <button key={e.id} onClick={() => onSelect(e)} className="mb-1 block w-full truncate rounded-md border-l-2 px-1.5 py-0.5 text-left text-[11px]" style={{ background: colorOf(e) + "22", borderColor: colorOf(e) }}>
                   {new Date(e.start).toLocaleTimeString(undefined, { timeZone: tz, hour: "2-digit", minute: "2-digit" })} {e.title}
