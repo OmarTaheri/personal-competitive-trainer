@@ -1,0 +1,11 @@
+node_modules
+.next
+.next-test
+.git
+data/app.db*
+data/uploads
+data/cache
+*.tsbuildinfo
+.env*.local
+Dockerfile
+.dockerignore
