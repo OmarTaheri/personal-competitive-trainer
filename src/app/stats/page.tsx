@@ -6,6 +6,8 @@ import { cfWindow, minutesSeries, trackProgress } from "@/lib/server/training";
 import { getAccount } from "@/lib/server/settings";
 import { SLOWED_BY } from "@/lib/ui";
 import StatsCharts from "./StatsCharts";
+import ConceptKeyboard from "@/components/ConceptKeyboard";
+import { conceptKeys } from "@/lib/server/home";
 
 export const dynamic = "force-dynamic";
 
@@ -40,22 +42,27 @@ export default function StatsPage() {
     avgFelt: done.length ? Math.round((done.reduce((s, { a }) => s + (a.felt ?? 0), 0) / done.length) * 10) / 10 : 0,
   };
 
+  const cses = trackProgress("cses");
+  const cfRating = getAccount("codeforces")?.rating;
+
   return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-black">Stats</h1>
-      <div className="grid gap-4 md:grid-cols-3 xl:grid-cols-6">
-        <Stat label="Hours trained" v={totals.hours} />
+    <div className="mx-auto max-w-[1120px] space-y-6 pb-6">
+      <h1 className="text-2xl font-semibold">Stats</h1>
+      <div className="card grid grid-cols-2 divide-line md:grid-cols-3 xl:grid-cols-9 xl:divide-x">
+        <Stat label="Hours" v={totals.hours} />
         <Stat label="Attempts" v={totals.attempts} />
-        <Stat label="Solved alone" v={totals.solved} color="#22c55e" />
-        <Stat label="Re-solves done" v={totals.resolves} />
-        <Stat label="Retired (mastered)" v={totals.retired} color="#22c55e" />
-        <Stat label="Avg. felt difficulty" v={totals.avgFelt} color="#ff7a1a" />
+        <Stat label="Solved alone" v={totals.solved} color="#2e9d57" />
+        <Stat label="Re-solves" v={totals.resolves} />
+        <Stat label="Mastered" v={totals.retired} color="#2e9d57" />
+        <Stat label="Avg. felt" v={totals.avgFelt} sub="/ 5" />
+        <Stat label="NeetCode" v={trackProgress("neetcode250").solved} sub="/ 250" />
+        <Stat label="CSES" v={cses.solved} sub={`/ ${cses.total}`} />
+        <Stat label="CF window" v={cfWindow()} sub={cfRating ? `rating ${cfRating}` : "not linked"} />
       </div>
-      <div className="grid gap-4 md:grid-cols-3">
-        <Stat label="NeetCode 250" v={`${trackProgress("neetcode250").solved} / 250`} color="#ff7a1a" />
-        <Stat label="CSES main sections" v={`${trackProgress("cses").solved} / ${trackProgress("cses").total}`} />
-        <Stat label="Codeforces window" v={`${cfWindow()}–${cfWindow() + 200}`} sub={getAccount("codeforces")?.rating ? `rating ${getAccount("codeforces")!.rating}` : "not linked"} />
-      </div>
+      <section className="card px-6 pb-5 pt-4">
+        <div className="eyebrow mb-3">Concepts</div>
+        <ConceptKeyboard keys={conceptKeys()} size="sm" />
+      </section>
       <StatsCharts series={minutesSeries(90)} byRating={byRating} phases={phases} slowed={slowed} mastery={mastery} />
     </div>
   );
@@ -63,10 +70,12 @@ export default function StatsPage() {
 
 function Stat({ label, v, color, sub }: { label: string; v: string | number; color?: string; sub?: string }) {
   return (
-    <div className="card card-pad">
-      <div className="text-sm text-mute">{label}</div>
-      <div className="mt-1 text-3xl font-black tabular-nums" style={{ color }}>{v}</div>
-      {sub && <div className="text-xs text-dim">{sub}</div>}
+    <div className="px-3.5 py-3">
+      <div className="eyebrow">{label}</div>
+      <div className="mt-0.5 flex items-baseline gap-1">
+        <span className="num text-2xl font-semibold" style={{ color }}>{v}</span>
+        {sub && <span className="text-xs text-mute">{sub}</span>}
+      </div>
     </div>
   );
 }

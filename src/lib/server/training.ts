@@ -130,7 +130,7 @@ export function weakConcepts(): string[] {
   return db().select().from(schema.conceptMastery).where(eq(schema.conceptMastery.weak, true)).orderBy(asc(schema.conceptMastery.score)).all().map((m) => m.conceptId);
 }
 
-function activeBoosts(date: string): string[] {
+export function activeBoosts(date: string): string[] {
   return db().select().from(schema.topicBoosts).where(gte(schema.topicBoosts.until, date)).all().map((b) => b.conceptId);
 }
 

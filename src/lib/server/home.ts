@@ -1,8 +1,10 @@
+import { eq } from "drizzle-orm";
+import { getDb, schema } from "@/db";
 import { CONCEPTS, CONCEPT_BY_ID } from "@/lib/concepts";
 import { level as masteryLevel } from "@/lib/engine/mastery";
 import type { GroupMastery } from "@/lib/character";
 import { getAccount, getSettings, today } from "./settings";
-import { cfWindow, getPlan, masteryMap, minutesSeries, trackProgress, weakConcepts } from "./training";
+import { activeBoosts, cfWindow, focusConcepts, getPlan, masteryMap, minutesSeries, trackProgress, weakConcepts } from "./training";
 import { upcomingContests } from "./sync";
 import { getStatus } from "./status";
 
@@ -18,6 +20,23 @@ export function groupMastery(): GroupMastery[] {
     const worst = [...cs].sort((a, b) => a.m!.score - b.m!.score)[0];
     const lv = anyWeak ? "weak" : masteryLevel(score, attempts);
     return { group: g, score, attempts, status: lv, weakest: worst.c.name };
+  });
+}
+
+export type ConceptKey = {
+  id: string; key: string; name: string; group: string;
+  score: number | null; attempts: number; status: "strong" | "learning" | "weak" | "new"; focus: boolean;
+};
+
+/** One entry per concept for the concept keyboard. `focus` = struggled with today, or boosted. */
+export function conceptKeys(): ConceptKey[] {
+  const mm = masteryMap();
+  const d = today(getSettings());
+  const focus = new Set([...focusConcepts(d), ...activeBoosts(d)]);
+  return CONCEPTS.map((c) => {
+    const m = mm.get(c.id);
+    const status = m?.weak ? "weak" : masteryLevel(m?.score, m?.attempts);
+    return { id: c.id, key: c.key, name: c.name, group: c.group, score: m?.score ?? null, attempts: m?.attempts ?? 0, status, focus: focus.has(c.id) };
   });
 }
 
@@ -47,10 +66,20 @@ export function homeData() {
     weak,
     learning,
     groups: groupMastery(),
+    keys: conceptKeys(),
+    solvedAlonePct: solvedAlonePct(),
     neetcode: trackProgress("neetcode250"),
     cses: trackProgress("cses"),
     cfWindow: cfWindow(),
     cfRating: getAccount("codeforces")?.rating ?? null,
     contests: upcomingContests(30, Date.now()),
   };
+}
+
+/** Share of finished attempts solved with no help: the "accuracy" number. */
+function solvedAlonePct(): number | null {
+  const db = getDb();
+  const rows = db.select({ r: schema.attempts.result, h: schema.attempts.helpUsed }).from(schema.attempts).where(eq(schema.attempts.status, "done")).all();
+  if (!rows.length) return null;
+  return Math.round((100 * rows.filter((x) => x.r === "solved" && x.h === "none").length) / rows.length);
 }

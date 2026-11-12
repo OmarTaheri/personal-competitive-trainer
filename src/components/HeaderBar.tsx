@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import type { Status } from "@/lib/server/status";
-import { PLATFORM_META } from "@/lib/ui";
+import { C, PLATFORM_META } from "@/lib/ui";
 import { fmtDuration, fmtMinutes } from "@/lib/time";
 
 function useNow(ms = 1000) {
@@ -23,13 +23,13 @@ export function countdown(ms: number): string {
   return `${m}m ${String(s).padStart(2, "0")}s`;
 }
 
-export function Ring({ value, max, size = 40, stroke = 5, color = "#22c55e" }: { value: number; max: number; size?: number; stroke?: number; color?: string }) {
+export function Ring({ value, max, size = 40, stroke = 5, color = C.accent }: { value: number; max: number; size?: number; stroke?: number; color?: string }) {
   const r = (size - stroke) / 2, c = 2 * Math.PI * r;
   const f = Math.min(1, max ? value / max : 0);
   return (
     <svg width={size} height={size} className="-rotate-90">
-      <circle cx={size / 2} cy={size / 2} r={r} stroke="#26262e" strokeWidth={stroke} fill="none" />
-      <circle cx={size / 2} cy={size / 2} r={r} stroke={f >= 1 ? "#22c55e" : color} strokeWidth={stroke} fill="none" strokeDasharray={c} strokeDashoffset={c * (1 - f)} strokeLinecap="round" />
+      <circle cx={size / 2} cy={size / 2} r={r} stroke={C.line} strokeWidth={stroke} fill="none" />
+      <circle cx={size / 2} cy={size / 2} r={r} stroke={f >= 1 ? C.green : color} strokeWidth={stroke} fill="none" strokeDasharray={c} strokeDashoffset={c * (1 - f)} strokeLinecap="round" />
     </svg>
   );
 }
@@ -54,46 +54,50 @@ export default function HeaderBar({ initial }: { initial: Status }) {
   const meta = nc ? PLATFORM_META[nc.platform] : null;
 
   return (
-    <header className="z-30 flex shrink-0 items-center gap-3 border-b border-line bg-bg/90 px-6 py-3 backdrop-blur">
+    <header className="z-30 flex shrink-0 items-center gap-7 border-b border-line bg-panel px-6 py-2.5">
       {a ? (
-        <Link href="/train" title="Back to training" className="flex items-center gap-2 rounded-2xl border border-orange/50 bg-orange-soft px-3 py-1.5 transition hover:border-orange">
-          <span className={`h-2.5 w-2.5 rounded-full ${a.phaseStartedAt ? "bg-orange animate-pulse" : "bg-dim"}`} />
-          <span className="max-w-[18rem] truncate font-semibold">{a.title}</span>
-          <span className={`font-mono text-lg font-bold tabular-nums ${a.phaseStartedAt ? "text-orange" : "text-mute"}`}>{fmtDuration(activeSec)}</span>
-          {a.status === "feedback" ? <span className="chip !border-green/40 text-green">feedback</span> : !a.phaseStartedAt && <span className="chip !text-xs text-mute">paused</span>}
+        <Link href="/train" title="Back to training" className="flex items-center gap-2.5 rounded-md border border-accent/40 px-3 py-1 transition hover:border-accent">
+          <span className={`h-2 w-2 rounded-full ${a.phaseStartedAt ? "animate-pulse bg-accent" : "bg-dim"}`} />
+          <span className="max-w-[16rem] truncate text-sm font-medium">{a.title}</span>
+          <span className={`num text-base font-semibold ${a.phaseStartedAt ? "text-accent" : "text-mute"}`}>{fmtDuration(activeSec)}</span>
+          {a.status === "feedback" ? <span className="text-xs text-green">feedback</span> : !a.phaseStartedAt && <span className="text-xs text-mute">paused</span>}
         </Link>
       ) : (
-        <Link href="/train" className="btn btn-orange !py-1.5 !text-sm">▶ Train</Link>
+        <Link href="/train" className="btn btn-primary !py-1.5 !text-sm">Start training</Link>
       )}
 
-      <div className="flex items-center gap-2 rounded-2xl border border-line bg-panel px-3 py-1.5" title="Training time today / goal">
-        <Ring value={liveMin} max={st.goalMin} size={30} stroke={4} color="#ff7a1a" />
-        <div className="leading-tight">
-          <div className="text-sm font-semibold tabular-nums">{fmtMinutes(liveMin)} <span className="text-dim">/ {fmtMinutes(st.goalMin)}</span></div>
-          <div className="text-[11px] text-mute">today</div>
-        </div>
-      </div>
-
-      <div className="flex items-center gap-1.5 rounded-2xl border border-line bg-panel px-3 py-1.5 text-sm" title="Days in a row with 15+ minutes">
-        <span>🔥</span><b className="tabular-nums">{st.streak}</b><span className="text-mute">day streak</span>
-      </div>
-
-      <div className="flex items-center gap-2 rounded-2xl border border-line bg-panel px-3 py-1.5 text-sm" title={`${st.xp} XP`}>
-        <span className="font-bold text-green">LV {st.level.level}</span>
-        <div className="h-1.5 w-20 overflow-hidden rounded bg-line"><div className="h-full bg-green" style={{ width: `${(100 * st.level.cur) / st.level.need}%` }} /></div>
-      </div>
+      <Metric label="Today" title="Training time today / goal">
+        <span className={liveMin >= st.goalMin ? "text-green" : ""}>{fmtMinutes(liveMin)}</span>
+        <span className="text-dim"> / {fmtMinutes(st.goalMin)}</span>
+      </Metric>
+      <Metric label="Streak" title="Days in a row with 15+ minutes">{st.streak}<span className="text-dim"> d</span></Metric>
+      <Metric label={`Level ${st.level.level}`} title={`${st.xp} XP`}>
+        <span className="flex items-center gap-2">
+          <span className="text-sm">{st.level.cur}<span className="text-dim">/{st.level.need}</span></span>
+          <span className="h-1 w-16 overflow-hidden rounded bg-line"><span className="block h-full bg-accent" style={{ width: `${(100 * st.level.cur) / st.level.need}%` }} /></span>
+        </span>
+      </Metric>
 
       <div className="ml-auto">
         {nc && meta ? (
-          <a href={nc.url} target="_blank" rel="noreferrer" className="flex items-center gap-2 rounded-2xl border border-line bg-panel px-3 py-1.5 text-sm hover:border-orange/60" title={new Date(nc.startUtc).toLocaleString(undefined, { timeZone: st.timezone })}>
-            <span className="rounded-md px-1.5 py-0.5 text-[11px] font-bold text-black" style={{ background: meta.color }}>{meta.short}</span>
-            <span className="max-w-[16rem] truncate">{nc.name}</span>
-            <span className="font-mono font-semibold tabular-nums text-orange">{countdown(nc.startUtc - now)}</span>
+          <a href={nc.url} target="_blank" rel="noreferrer" className="group flex items-center gap-2.5 text-sm" title={new Date(nc.startUtc).toLocaleString(undefined, { timeZone: st.timezone })}>
+            <span className="rounded px-1.5 py-0.5 text-[10px] font-bold text-white" style={{ background: meta.color }}>{meta.short}</span>
+            <span className="max-w-[16rem] truncate text-mute group-hover:text-ink">{nc.name}</span>
+            <span className="num font-semibold text-ink">{countdown(nc.startUtc - now)}</span>
           </a>
         ) : (
-          <Link href="/calendar" className="text-sm text-mute">No upcoming contests yet</Link>
+          <Link href="/calendar" className="text-sm text-mute hover:text-accent">No upcoming contests yet</Link>
         )}
       </div>
     </header>
+  );
+}
+
+function Metric({ label, title, children }: { label: string; title?: string; children: React.ReactNode }) {
+  return (
+    <div title={title} className="leading-tight">
+      <div className="text-[10px] font-semibold uppercase tracking-wider text-dim">{label}</div>
+      <div className="num text-base font-semibold">{children}</div>
+    </div>
   );
 }

@@ -4,7 +4,7 @@ import { useState } from "react";
 export type { GroupMastery } from "@/lib/character";
 import type { GroupMastery } from "@/lib/character";
 
-const STATUS_COLOR = { strong: "#22c55e", learning: "#ff7a1a", weak: "#ef4444", new: "#4b5563" } as const;
+const STATUS_COLOR = { strong: "#2e9d57", learning: "#d99a00", weak: "#d64545", new: "#b8bbc0" } as const;
 
 /** Where each concept group "lives" on the body (percent of the figure box). */
 const SPOTS: Record<string, { x: number; y: number; label: string }> = {
@@ -18,7 +18,7 @@ const SPOTS: Record<string, { x: number; y: number; label: string }> = {
   Basics: { x: 42, y: 77, label: "Basics" },
 };
 
-export default function Character({ level, cfRating, groups, className = "" }: { level: number; cfRating: number | null; groups: GroupMastery[]; className?: string }) {
+export default function Character({ level, cfRating, groups, className = "", info = true }: { level: number; cfRating: number | null; groups: GroupMastery[]; className?: string; info?: boolean }) {
   const [hover, setHover] = useState<string | null>(null);
   // Gear is earned: at level 1 you only have plain shorts.
   const tee = level >= 2, joggers = level >= 3, sneakers = level >= 4, headband = level >= 5, wrist = level >= 7;
@@ -27,8 +27,8 @@ export default function Character({ level, cfRating, groups, className = "" }: {
   // Light-medium skin.
   const skin = "#dcaa82", skinShade = "#c08b64", skinDeep = "#a3714d", outline = "#4a2f20";
   const hair = "#20140e", hairMid = "#2e1d14", hairHi = "#4a3022";
-  const top = hoodie ? "#ff7a1a" : "#1f2430";
-  const topShade = hoodie ? "#d9600c" : "#151922";
+  const top = hoodie ? "#2f6fde" : "#1f2430";
+  const topShade = hoodie ? "#2459b8" : "#151922";
   const gm = new Map(groups.map((g) => [g.group, g]));
   const weakest = [...groups].filter((g) => g.score != null).sort((a, b) => (a.score ?? 1) - (b.score ?? 1))[0];
   const shown = hover ? gm.get(hover) : weakest;
@@ -40,7 +40,7 @@ export default function Character({ level, cfRating, groups, className = "" }: {
         <defs>
           <radialGradient id="aura" cx="50%" cy="50%" r="50%">
             <stop offset="0%" stopColor="#22c55e" stopOpacity="0.35" />
-            <stop offset="60%" stopColor="#ff7a1a" stopOpacity="0.12" />
+            <stop offset="60%" stopColor="#2f6fde" stopOpacity="0.12" />
             <stop offset="100%" stopColor="#000" stopOpacity="0" />
           </radialGradient>
           <radialGradient id="faceShade" cx="45%" cy="40%" r="65%">
@@ -129,7 +129,7 @@ export default function Character({ level, cfRating, groups, className = "" }: {
             <path d="M116 444 l6 4 M124 443 l6 4 M132 443 l6 4" stroke="#9ca3af" strokeWidth="1.5" />
             <path d="M162 444 l6 4 M170 443 l6 4 M178 443 l6 4" stroke="#9ca3af" strokeWidth="1.5" />
             <rect x="104" y="452" width="52" height="4" rx="2" fill="#22c55e" />
-            <rect x="146" y="452" width="52" height="4" rx="2" fill="#ff7a1a" />
+            <rect x="146" y="452" width="52" height="4" rx="2" fill="#2f6fde" />
           </g>
         ) : (
           <g fill={skin} stroke={outline} strokeWidth="1.2">
@@ -172,7 +172,7 @@ export default function Character({ level, cfRating, groups, className = "" }: {
             <rect x="-6" y="-2" width="54" height="36" rx="4" fill="#2b2f38" stroke="#0b0b0d" />
             <rect x="-2" y="2" width="46" height="26" rx="2" fill="#0b0b0d" />
             <path d="M3 9 h14 M3 14 h22 M3 19 h10" stroke="#22c55e" strokeWidth="2" />
-            <path d="M27 9 h8" stroke="#ff7a1a" strokeWidth="2" />
+            <path d="M27 9 h8" stroke="#2f6fde" strokeWidth="2" />
           </g>
         )}
 
@@ -208,7 +208,7 @@ export default function Character({ level, cfRating, groups, className = "" }: {
           <>
             <path d="M130 150 Q150 170 170 150 Q150 160 130 150 Z" fill={skinShade} />
             <path d="M132 150 Q150 168 168 150" stroke="#2c3344" strokeWidth="5" fill="none" />
-            <rect x="104" y="214" width="92" height="8" fill="#ff7a1a" opacity="0.9" />
+            <rect x="104" y="214" width="92" height="8" fill="#2f6fde" opacity="0.9" />
             <rect x="104" y="226" width="92" height="4" fill="#22c55e" opacity="0.9" />
           </>
         ) : null}
@@ -221,8 +221,8 @@ export default function Character({ level, cfRating, groups, className = "" }: {
         )}
         {cfRating && shirt ? (
           <g>
-            <rect x="160" y="176" width="34" height="18" rx="5" fill="#0b0b0d" stroke="#ff7a1a" />
-            <text x="177" y="189" textAnchor="middle" fontSize="11" fontWeight="700" fill="#ff7a1a" fontFamily="monospace">{cfRating}</text>
+            <rect x="160" y="176" width="34" height="18" rx="5" fill="#0b0b0d" stroke="#2f6fde" />
+            <text x="177" y="189" textAnchor="middle" fontSize="11" fontWeight="700" fill="#2f6fde" fontFamily="monospace">{cfRating}</text>
           </g>
         ) : null}
 
@@ -244,7 +244,7 @@ export default function Character({ level, cfRating, groups, className = "" }: {
           <path d="M180 66 a3 3 0 1 1 3 3" />
         </g>
         <path d="M108 92 q2 -8 6 -12 M192 92 q-2 -8 -6 -12" stroke={hair} strokeWidth="5" strokeLinecap="round" />
-        {headband && <path d="M103 78 Q150 58 197 78 L197 89 Q150 69 103 89 Z" fill="#ff7a1a" stroke="#c2410c" strokeWidth="1" />}
+        {headband && <path d="M103 78 Q150 58 197 78 L197 89 Q150 69 103 89 Z" fill="#2f6fde" stroke="#2459b8" strokeWidth="1" />}
         {/* eyebrows */}
         <path d="M124 94 q9 -7 19 -2 l-1 3 q-9 -3 -17 2 z" fill={hair} />
         <path d="M176 94 q-9 -7 -19 -2 l1 3 q9 -3 17 2 z" fill={hair} />
@@ -285,11 +285,11 @@ export default function Character({ level, cfRating, groups, className = "" }: {
         );
       })}
 
-      {shown && (
-        <div className="absolute right-[-12%] top-[18%] w-40 rounded-2xl border border-line bg-panel2/95 p-3 shadow-xl backdrop-blur">
+      {info && shown && (
+        <div className="absolute right-[-12%] top-[18%] w-40 rounded-lg border border-line bg-panel/95 p-3 shadow-lg backdrop-blur">
           <div className="text-xs text-mute">{hover ? "Concept group" : "Weakest area"}</div>
           <div className="font-semibold">{SPOTS[shown.group]?.label ?? shown.group}</div>
-          <div className="mt-1 text-2xl font-black" style={{ color: STATUS_COLOR[shown.status] }}>
+          <div className="num mt-1 text-2xl font-semibold" style={{ color: STATUS_COLOR[shown.status] }}>
             {shown.score == null ? "—" : Math.round(shown.score * 100)}<span className="text-sm font-normal text-mute"> /100</span>
           </div>
           <div className="text-xs text-mute">{shown.attempts} attempts{shown.weakest ? ` · weakest: ${shown.weakest}` : ""}</div>

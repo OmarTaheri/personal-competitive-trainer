@@ -103,7 +103,7 @@ export default function SettingsClient({ settings, secrets, accounts, log: initi
 
   return (
     <div className="mx-auto max-w-5xl space-y-6 pb-24">
-      <h1 className="text-3xl font-black">Settings</h1>
+      <h1 className="text-2xl font-semibold">Settings</h1>
 
       <Section title="Linked accounts" desc="Problems you already solved on each platform get marked, so the planner never serves them as new.">
         <div className="grid gap-4 md:grid-cols-2">
@@ -112,9 +112,9 @@ export default function SettingsClient({ settings, secrets, accounts, log: initi
             const m = PLATFORM_META[p];
             const busy = running.some((r) => r.includes(p));
             return (
-              <div key={p} className="rounded-2xl border border-line bg-panel2 p-4">
+              <div key={p} className="rounded-md border border-line bg-panel2 p-4">
                 <div className="flex items-center gap-2">
-                  <span className="rounded-md px-1.5 py-0.5 text-xs font-bold text-black" style={{ background: m.color }}>{m.short}</span>
+                  <span className="rounded-md px-1.5 py-0.5 text-xs font-bold text-white" style={{ background: m.color }}>{m.short}</span>
                   <span className="font-semibold">{m.label}</span>
                   {acc?.rating ? <span className="chip ml-auto !text-xs">rating {acc.rating}</span> : null}
                 </div>
@@ -151,9 +151,9 @@ export default function SettingsClient({ settings, secrets, accounts, log: initi
         </div>
         <datalist id="tzs">{["Asia/Bangkok", "UTC", "Europe/London", "Europe/Berlin", "America/New_York", "America/Los_Angeles", "Asia/Tokyo", "Asia/Dubai", "Asia/Riyadh", "Asia/Kolkata"].map((t) => <option key={t} value={t} />)}</datalist>
         <div className="mt-5 grid gap-4 md:grid-cols-3">
-          <Share label="NeetCode 250" color="#ff7a1a" v={s.shareNeetcode} on={(v) => set("shareNeetcode", v)} />
-          <Share label="Codeforces" color="#22c55e" v={s.shareCodeforces} on={(v) => set("shareCodeforces", v)} />
-          <Share label="CSES" color="#60a5fa" v={s.shareCses} on={(v) => set("shareCses", v)} />
+          <Share label="NeetCode 250" color="#2f6fde" v={s.shareNeetcode} on={(v) => set("shareNeetcode", v)} />
+          <Share label="Codeforces" color="#2e9d57" v={s.shareCodeforces} on={(v) => set("shareCodeforces", v)} />
+          <Share label="CSES" color="#2f6fde" v={s.shareCses} on={(v) => set("shareCses", v)} />
         </div>
         {shareSum !== 100 && <div className="mt-2 text-sm text-amber">Shares add up to {shareSum}% — they're normalized, but 100% is easier to read.</div>}
         <div className="mt-5 grid gap-4 md:grid-cols-3">
@@ -179,7 +179,7 @@ export default function SettingsClient({ settings, secrets, accounts, log: initi
 
       <Section title="Notifications" desc="Contest reminders 1 hour and 10 minutes before, plus a daily count of re-solves (no names).">
         <div className="flex flex-wrap items-center gap-3">
-          <button className="btn btn-orange" onClick={enablePush}>Enable browser notifications</button>
+          <button className="btn btn-primary" onClick={enablePush}>Enable browser notifications</button>
           <button className="btn" onClick={() => test("push")}>Send test</button>
           <Field label="Daily digest hour"><Num v={s.digestHour} on={(v) => set("digestHour", v)} /></Field>
         </div>
@@ -197,13 +197,13 @@ export default function SettingsClient({ settings, secrets, accounts, log: initi
           {counts.map((c) => <span key={c.platform} className="chip">{PLATFORM_META[c.platform]?.label ?? c.platform}: {c.total.toLocaleString()} problems · {c.solved ?? 0} solved</span>)}
         </div>
         <div className="mt-4 flex flex-wrap gap-2">
-          <button className="btn btn-orange" onClick={() => sync("all")}>Sync everything now</button>
+          <button className="btn btn-primary" onClick={() => sync("all")}>Sync everything now</button>
           <button className="btn" onClick={() => sync("solves")}>Sync solves</button>
           <button className="btn" onClick={() => sync("contests")}>Sync contests</button>
           {["leetcode", "codeforces", "atcoder"].map((p) => <button key={p} className="btn" onClick={() => sync("problems", p)}>Import {PLATFORM_META[p].label} problems</button>)}
         </div>
-        {running.length > 0 && <div className="mt-3 text-sm text-orange">Running: {running.join(", ")}</div>}
-        <div className="mt-4 max-h-72 overflow-auto rounded-2xl border border-line scroll-thin">
+        {running.length > 0 && <div className="mt-3 text-sm text-accent">Running: {running.join(", ")}</div>}
+        <div className="mt-4 max-h-72 overflow-auto rounded-md border border-line scroll-thin">
           <table className="tbl"><tbody>
             {log.map((l) => (
               <tr key={l.id}><td className="whitespace-nowrap text-mute">{new Date(l.at).toLocaleString()}</td><td className="whitespace-nowrap">{l.job}</td><td className={l.ok ? "text-green" : "text-red"}>{l.ok ? "ok" : "failed"}</td><td className="text-mute">{l.message}</td></tr>
@@ -248,8 +248,8 @@ export default function SettingsClient({ settings, secrets, accounts, log: initi
       <ResetCard onDone={() => { flash(true, "Progress reset. Fresh start!"); refreshHeader(); router.refresh(); }} onError={(m) => flash(false, m)} />
 
       <div className="fixed bottom-6 right-6 z-40 flex items-center gap-3">
-        {msg && <div className={`rounded-xl border px-4 py-2 text-sm shadow-xl ${msg.ok ? "border-green/50 bg-[#0f2016] text-green" : "border-red/50 bg-[#2a1010] text-red"}`}>{msg.text}</div>}
-        <button className="btn btn-orange !px-8 !py-4 !text-lg shadow-2xl" onClick={save}>Save settings</button>
+        {msg && <div className={`rounded-xl border px-4 py-2 text-sm shadow-xl ${msg.ok ? "border-green/50 bg-[#e9f5ee] text-green" : "border-red/50 bg-[#fbecec] text-red"}`}>{msg.text}</div>}
+        <button className="btn btn-primary !px-8 !py-4 !text-lg shadow-2xl" onClick={save}>Save settings</button>
       </div>
     </div>
   );
@@ -311,7 +311,7 @@ function Num({ v, on, step = 1 }: { v: number; on: (v: number) => void; step?: n
 
 function Share({ label, color, v, on }: { label: string; color: string; v: number; on: (v: number) => void }) {
   return (
-    <div className="rounded-2xl border border-line bg-panel2 p-4">
+    <div className="rounded-md border border-line bg-panel2 p-4">
       <div className="flex justify-between"><span>{label}</span><b style={{ color }}>{v}%</b></div>
       <input type="range" min={0} max={100} value={v} onChange={(e) => on(Number(e.target.value))} className="mt-2 w-full" style={{ accentColor: color }} />
     </div>

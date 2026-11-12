@@ -28,7 +28,7 @@ export default async function LogPage({ searchParams }: { searchParams: Promise<
   return (
     <div className="space-y-5">
       <div>
-        <h1 className="text-3xl font-black">Training log</h1>
+        <h1 className="text-2xl font-semibold">Training log</h1>
         <p className="text-mute">{total} finished attempts · search key ideas and notes</p>
       </div>
       <form className="card card-pad flex flex-wrap gap-3">
@@ -37,7 +37,7 @@ export default async function LogPage({ searchParams }: { searchParams: Promise<
           <option value="">All results</option>
           {Object.entries(RESULT_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
         </select>
-        <button className="btn btn-orange">Search</button>
+        <button className="btn btn-primary">Search</button>
       </form>
 
       <div className="space-y-3">
@@ -49,8 +49,8 @@ export default async function LogPage({ searchParams }: { searchParams: Promise<
             <details key={a.id} className="card group">
               <summary className="flex cursor-pointer list-none flex-wrap items-center gap-3 px-5 py-4">
                 <span className="w-28 text-sm text-mute">{new Date(a.startedAt).toLocaleDateString(undefined, { timeZone: tz, month: "short", day: "numeric", year: "2-digit" })}</span>
-                <span className="rounded-md px-1.5 py-0.5 text-[11px] font-bold text-black" style={{ background: m?.color }}>{m?.short}</span>
-                <a href={p.url} target="_blank" rel="noreferrer" className="min-w-0 flex-1 truncate font-semibold hover:text-orange">{p.title}</a>
+                <span className="rounded-md px-1.5 py-0.5 text-[11px] font-bold text-white" style={{ background: m?.color }}>{m?.short}</span>
+                <a href={p.url} target="_blank" rel="noreferrer" className="min-w-0 flex-1 truncate font-semibold hover:text-accent">{p.title}</a>
                 {a.isResolve && <span className="chip !text-xs text-green">re-solve</span>}
                 <span className="chip !text-xs">{TRACK_LABEL[a.trackId ?? "manual"] ?? a.trackId}</span>
                 <span className="font-semibold" style={{ color: RESULT_COLOR[a.result ?? ""] }}>{RESULT_LABEL[a.result ?? ""]}</span>
@@ -62,7 +62,7 @@ export default async function LogPage({ searchParams }: { searchParams: Promise<
                 <div className="space-y-2">
                   <div><span className="text-mute">Key idea: </span><b>{a.keyIdea}</b></div>
                   <div className="text-sm text-mute">💭 {fmtDuration(a.thinkSec)} · 😵 {fmtDuration(a.stuckSec)} · ⌨ {fmtDuration(a.codeSec)} · expected {a.expectedMin} min · help: {a.helpUsed}</div>
-                  {a.slowedBy.length > 0 && <div className="flex flex-wrap gap-1">{a.slowedBy.map((s) => <span key={s} className="chip !text-xs text-orange">{slowLabel[s] ?? s}</span>)}</div>}
+                  {a.slowedBy.length > 0 && <div className="flex flex-wrap gap-1">{a.slowedBy.map((s) => <span key={s} className="chip !text-xs text-accent">{slowLabel[s] ?? s}</span>)}</div>}
                   {a.notes && <div className="whitespace-pre-wrap rounded-xl bg-panel2 p-3 text-sm">{a.notes}</div>}
                 </div>
                 <div className="flex flex-wrap gap-3">
@@ -72,7 +72,7 @@ export default async function LogPage({ searchParams }: { searchParams: Promise<
             </details>
           );
         })}
-        {!rows.length && <div className="card card-pad text-center text-dim">No attempts yet. <Link href="/train" className="text-orange">Start training →</Link></div>}
+        {!rows.length && <div className="card card-pad text-center text-dim">No attempts yet. <Link href="/train" className="text-accent">Start training →</Link></div>}
       </div>
       {pages > 1 && (
         <div className="flex items-center justify-center gap-2">

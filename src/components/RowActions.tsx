@@ -9,7 +9,7 @@ export function SolvedToggle({ id, solved }: { id: number; solved: boolean }) {
   return (
     <button title={s ? "Marked solved — click to unmark" : "Mark as solved"}
       onClick={async () => { await api(`/api/problems/${id}`, { solved: !s }); setS(!s); }}
-      className={`grid h-6 w-6 place-items-center rounded-md border text-xs ${s ? "border-green bg-green text-black" : "border-line text-transparent hover:border-green/60"}`}>
+      className={`grid h-6 w-6 place-items-center rounded-md border text-xs ${s ? "border-green bg-green text-white" : "border-line text-transparent hover:border-green/60"}`}>
       ✓
     </button>
   );

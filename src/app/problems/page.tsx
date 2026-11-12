@@ -48,7 +48,7 @@ export default async function ProblemsPage({ searchParams }: { searchParams: Pro
     <div className="space-y-5">
       <div className="flex items-end justify-between">
         <div>
-          <h1 className="text-3xl font-black">Problem bank</h1>
+          <h1 className="text-2xl font-semibold">Problem bank</h1>
           <p className="text-mute">{total.toLocaleString()} problems · ratings normalized to the Codeforces scale</p>
         </div>
       </div>
@@ -77,7 +77,7 @@ export default async function ProblemsPage({ searchParams }: { searchParams: Pro
           <option value="rating_desc">Rating ↓</option>
           <option value="title">Title</option>
         </select>
-        <button className="btn btn-orange">Filter</button>
+        <button className="btn btn-primary">Filter</button>
       </form>
 
       <div className="card overflow-x-auto scroll-thin">
@@ -91,15 +91,15 @@ export default async function ProblemsPage({ searchParams }: { searchParams: Pro
                 <tr key={p.id}>
                   <td><SolvedToggle id={p.id} solved={p.solved} /></td>
                   <td className="max-w-[28rem]">
-                    <a href={p.url} target="_blank" rel="noreferrer" className="font-medium hover:text-orange">{p.title}</a>
+                    <a href={p.url} target="_blank" rel="noreferrer" className="font-medium hover:text-accent">{p.title}</a>
                     {p.paidOnly && <span className="ml-2 text-xs text-amber">premium</span>}
                     {p.section && p.platform !== "codeforces" && <div className="text-xs text-dim">{p.section}</div>}
                   </td>
-                  <td><span className="rounded-md px-1.5 py-0.5 text-[11px] font-bold text-black" style={{ background: m?.color }}>{m?.short ?? p.platform}</span></td>
+                  <td><span className="rounded-md px-1.5 py-0.5 text-[11px] font-bold text-white" style={{ background: m?.color }}>{m?.short ?? p.platform}</span></td>
                   <td style={{ color: diffColor(p.rawDifficulty, p.normRating) }}>{p.platform === "leetcode" ? p.rawDifficulty : p.platform === "cses" ? "—" : p.rawDifficulty}</td>
                   <td className="font-mono" style={{ color: diffColor(null, p.normRating) }}>{p.normRating ?? "—"}</td>
                   <td className="max-w-[16rem]">
-                    <div className="flex flex-wrap gap-1">{(cm.get(p.id) ?? []).map((c) => <Link key={c} href={qs({ concept: c, page: "1" })} className="chip !py-0 !text-[11px] text-mute hover:text-orange">{CONCEPT_BY_ID.get(c)?.name ?? c}</Link>)}</div>
+                    <div className="flex flex-wrap gap-1">{(cm.get(p.id) ?? []).map((c) => <Link key={c} href={qs({ concept: c, page: "1" })} className="chip !py-0 !text-[11px] text-mute hover:text-accent">{CONCEPT_BY_ID.get(c)?.name ?? c}</Link>)}</div>
                   </td>
                   <td>{l ? <span style={{ color: RESULT_COLOR[l.result ?? ""] }}>{RESULT_LABEL[l.result ?? ""] ?? "in progress"}<span className="text-dim"> · {l.n}×</span></span> : <span className="text-dim">—</span>}</td>
                   <td><TrainThis id={p.id} url={p.url} /></td>

@@ -30,24 +30,24 @@ const NAV: { href: string; icon: keyof typeof I; label: string }[] = [
 export default function Sidebar() {
   const path = usePathname();
   return (
-    <aside className="flex h-dvh w-20 shrink-0 flex-col items-center gap-2 border-r border-line bg-[#0e0e11] py-5">
-      <Link href="/" className="mb-4 grid h-11 w-11 place-items-center rounded-2xl bg-orange text-lg font-black text-black" title="CP Training">
+    <aside className="flex h-dvh w-[4.5rem] shrink-0 flex-col items-center gap-1 border-r border-line bg-panel py-4">
+      <Link href="/" className="mb-3 grid h-9 w-9 place-items-center rounded-md bg-ink font-mono text-sm font-bold text-white" title="CP Training">
         {"</>"}
       </Link>
       {NAV.map((n) => {
         const active = n.href === "/" ? path === "/" : path.startsWith(n.href);
         return (
           <Link key={n.href} href={n.href} title={n.label}
-            className={`group relative grid h-12 w-12 place-items-center rounded-2xl transition ${active ? "bg-orange-soft text-orange" : "text-mute hover:bg-panel2 hover:text-ink"}`}>
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d={I[n.icon]} /></svg>
-            {active && <span className="absolute -left-4 h-6 w-1 rounded-r bg-orange" />}
-            <span className="pointer-events-none absolute left-14 z-50 whitespace-nowrap rounded-lg bg-panel2 px-2 py-1 text-xs text-ink opacity-0 shadow-lg transition group-hover:opacity-100">{n.label}</span>
+            className={`flex w-16 flex-col items-center gap-0.5 rounded-md py-1.5 transition ${active ? "text-accent" : "text-mute hover:bg-panel2 hover:text-ink"}`}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d={I[n.icon]} /></svg>
+            <span className="w-full truncate px-0.5 text-center text-[10px] leading-tight">{n.label.replace("Weekly review", "Review")}</span>
           </Link>
         );
       })}
       <form method="post" action="/api/logout" className="mt-auto">
-        <button type="submit" title="Log out" className="grid h-12 w-12 place-items-center rounded-2xl text-mute transition hover:bg-panel2 hover:text-ink">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" /></svg>
+        <button type="submit" title="Log out" className="flex w-16 flex-col items-center gap-0.5 rounded-md py-1.5 text-mute transition hover:bg-panel2 hover:text-ink">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" /></svg>
+          <span className="text-[10px] leading-tight">Log out</span>
         </button>
       </form>
     </aside>

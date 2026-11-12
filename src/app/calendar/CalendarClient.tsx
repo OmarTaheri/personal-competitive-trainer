@@ -19,7 +19,7 @@ const fmtHM = (min: number) => `${String(Math.floor(min / 60) % 24).padStart(2, 
 const monthName = (d: string) => new Date(d + "T12:00:00Z").toLocaleDateString("en-US", { month: "long", timeZone: "UTC" });
 
 function colorOf(e: CalEvent) {
-  return e.kind === "training" ? "#22c55e" : PLATFORM_META[e.platform]?.color ?? "#9ca3af";
+  return e.kind === "training" ? "#2e9d57" : PLATFORM_META[e.platform]?.color ?? "#6b6f76";
 }
 
 export default function CalendarClient({ tz: tz0, initial, initialRange }: { tz: string; initial: CalEvent[]; initialRange: [number, number] }) {
@@ -72,8 +72,8 @@ export default function CalendarClient({ tz: tz0, initial, initialRange }: { tz:
       {/* toolbar */}
       <div className="flex flex-wrap items-center gap-3 border-b border-line px-5 py-4">
         <div className="flex rounded-xl border border-line p-1">
-          <button title="Calendar" onClick={() => setView("week")} className={`rounded-lg px-2.5 py-1.5 ${view !== "list" ? "bg-panel2 text-orange" : "text-mute"}`}>📅</button>
-          <button title="List" onClick={() => setView("list")} className={`rounded-lg px-2.5 py-1.5 ${view === "list" ? "bg-panel2 text-orange" : "text-mute"}`}>☰</button>
+          <button title="Calendar" onClick={() => setView("week")} className={`rounded-lg px-2.5 py-1.5 ${view !== "list" ? "bg-panel2 text-accent" : "text-mute"}`}>📅</button>
+          <button title="List" onClick={() => setView("list")} className={`rounded-lg px-2.5 py-1.5 ${view === "list" ? "bg-panel2 text-accent" : "text-mute"}`}>☰</button>
         </div>
         <button className="btn" onClick={() => setAnchor(today)}>Today</button>
         <div className="flex">
@@ -83,7 +83,7 @@ export default function CalendarClient({ tz: tz0, initial, initialRange }: { tz:
         <div className="mx-auto text-2xl font-semibold">{title}</div>
         <div className="flex rounded-xl border border-line p-1">
           {(["day", "week", "month"] as const).map((v) => (
-            <button key={v} onClick={() => setView(v)} className={`rounded-lg px-4 py-1.5 capitalize ${view === v ? "bg-orange font-semibold text-black" : "text-mute hover:text-ink"}`}>{v}</button>
+            <button key={v} onClick={() => setView(v)} className={`rounded-lg px-4 py-1.5 capitalize ${view === v ? "bg-accent font-semibold text-white" : "text-mute hover:text-ink"}`}>{v}</button>
           ))}
         </div>
         <select className="input !w-auto" value={tz} onChange={(e) => setTz(e.target.value)} title="Time zone (default from Settings)">
@@ -113,9 +113,9 @@ export default function CalendarClient({ tz: tz0, initial, initialRange }: { tz:
             {days.map((d) => {
               const isToday = d === today;
               return (
-                <div key={d} className={`border-l border-line py-3 text-center ${isToday ? "border-b-2 !border-b-orange" : ""}`}>
-                  <span className={isToday ? "font-bold text-orange" : "text-ink"}>{Number(d.slice(8))} </span>
-                  <span className={isToday ? "text-orange" : "text-mute"}>{new Date(d + "T12:00:00Z").toLocaleDateString("en-US", { weekday: "short", timeZone: "UTC" })}</span>
+                <div key={d} className={`border-l border-line py-3 text-center ${isToday ? "border-b-2 !border-b-accent" : ""}`}>
+                  <span className={isToday ? "font-bold text-accent" : "text-ink"}>{Number(d.slice(8))} </span>
+                  <span className={isToday ? "text-accent" : "text-mute"}>{new Date(d + "T12:00:00Z").toLocaleDateString("en-US", { weekday: "short", timeZone: "UTC" })}</span>
                 </div>
               );
             })}
@@ -132,7 +132,7 @@ export default function CalendarClient({ tz: tz0, initial, initialRange }: { tz:
       )}
 
       {sel && (
-        <div className="fixed inset-0 z-50 grid place-items-center bg-black/60" onClick={() => setSel(null)}>
+        <div className="fixed inset-0 z-50 grid place-items-center bg-ink/20" onClick={() => setSel(null)}>
           <div className="card card-pad w-[26rem]" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center gap-2">
               <span className="h-3 w-3 rounded-full" style={{ background: colorOf(sel) }} />
@@ -144,7 +144,7 @@ export default function CalendarClient({ tz: tz0, initial, initialRange }: { tz:
             </div>
             {sel.result && <div className="mt-1">{RESULT_LABEL[sel.result]}</div>}
             <div className="mt-4 flex gap-2">
-              {sel.url && <a className="btn btn-orange" href={sel.url} target="_blank" rel="noreferrer">Open ↗</a>}
+              {sel.url && <a className="btn btn-primary" href={sel.url} target="_blank" rel="noreferrer">Open ↗</a>}
               {sel.kind === "contest" && sel.end > Date.now() && (
                 <button className={`btn ${sel.joined ? "!border-green/60 text-green" : ""}`} onClick={() => toggleJoin(sel)}>{sel.joined ? "✓ I'm joining" : "I'll join this"}</button>
               )}
@@ -181,14 +181,14 @@ function DayColumn({ date, isToday, events, tz, onSelect }: { date: string; isTo
 
   return (
     <div className="relative border-l border-line">
-      {Array.from({ length: 24 }, (_, h) => <div key={h} className="absolute inset-x-0 border-t border-[#1d1d24]" style={{ top: h * HOUR_PX }} />)}
+      {Array.from({ length: 24 }, (_, h) => <div key={h} className="absolute inset-x-0 border-t border-[#f0f0ed]" style={{ top: h * HOUR_PX }} />)}
       {placed.map(({ e, top, bottom, lane }) => {
         const c = colorOf(e);
         const h = ((bottom - top) / 60) * HOUR_PX;
         return (
           <button key={e.id} onClick={() => onSelect(e)}
             className="absolute overflow-hidden rounded-lg border-l-4 px-2 py-1 text-left text-xs transition hover:brightness-125"
-            style={{ top: (top / 60) * HOUR_PX, height: Math.max(22, h - 2), left: `calc(${(100 * lane) / nLanes}% + 2px)`, width: `calc(${100 / nLanes}% - 4px)`, background: c + "26", borderColor: c, color: "#f4f4f5" }}>
+            style={{ top: (top / 60) * HOUR_PX, height: Math.max(22, h - 2), left: `calc(${(100 * lane) / nLanes}% + 2px)`, width: `calc(${100 / nLanes}% - 4px)`, background: c + "26", borderColor: c, color: "#1f2328" }}>
             <div className="truncate font-semibold" style={{ color: c }}>{e.kind === "training" ? "🏋 " : ""}{e.title}</div>
             {h > 34 && <div className="truncate text-mute">🕒 {fmtHM(top)} – {fmtHM(bottom)}</div>}
             {h > 54 && e.kind === "contest" && <div className="truncate text-mute">📍 {PLATFORM_META[e.platform]?.label}{e.joined ? " · joining ✓" : ""}</div>}
@@ -197,7 +197,7 @@ function DayColumn({ date, isToday, events, tz, onSelect }: { date: string; isTo
       })}
       {nowMin >= 0 && (
         <div className="pointer-events-none absolute inset-x-0 z-10" style={{ top: (nowMin / 60) * HOUR_PX }}>
-          <div className="relative h-0.5 bg-orange"><span className="absolute -left-1.5 -top-1 h-2.5 w-2.5 rounded-full bg-orange" /></div>
+          <div className="relative h-0.5 bg-accent"><span className="absolute -left-1.5 -top-1 h-2.5 w-2.5 rounded-full bg-accent" /></div>
         </div>
       )}
     </div>
@@ -221,7 +221,7 @@ function MonthGrid({ anchor, today, events, tz, onSelect, onDay }: { anchor: str
           const inMonth = d.slice(0, 7) === anchor.slice(0, 7);
           return (
             <div key={d} className={`min-h-32 border-b border-l border-line p-1.5 ${inMonth ? "" : "opacity-40"}`}>
-              <button onClick={() => onDay(d)} className={`mb-1 grid h-7 w-7 place-items-center rounded-full text-sm ${d === today ? "bg-orange font-bold text-black" : "hover:bg-panel2"}`}>{Number(d.slice(8))}</button>
+              <button onClick={() => onDay(d)} className={`mb-1 grid h-7 w-7 place-items-center rounded-full text-sm ${d === today ? "bg-accent font-bold text-white" : "hover:bg-panel2"}`}>{Number(d.slice(8))}</button>
               {contests.slice(0, 3).map((e) => (
                 <button key={e.id} onClick={() => onSelect(e)} className="mb-1 block w-full truncate rounded-md border-l-2 px-1.5 py-0.5 text-left text-[11px]" style={{ background: colorOf(e) + "22", borderColor: colorOf(e) }}>
                   {new Date(e.start).toLocaleTimeString(undefined, { timeZone: tz, hour: "2-digit", minute: "2-digit" })} {e.title}
@@ -250,9 +250,9 @@ function ListView({ anchor, events, tz, onSelect }: { anchor: string; events: Ca
           {evs.map((e) => {
             const m = PLATFORM_META[e.platform];
             return (
-              <button key={e.id} onClick={() => onSelect(e)} className="mb-2 flex w-full items-center gap-3 rounded-2xl border border-line bg-panel2 px-4 py-3 text-left hover:border-orange/50">
-                <span className="w-24 font-mono text-orange">{new Date(e.start).toLocaleTimeString(undefined, { timeZone: tz, hour: "2-digit", minute: "2-digit" })}</span>
-                <span className="rounded-md px-1.5 py-0.5 text-[11px] font-bold text-black" style={{ background: m?.color }}>{m?.short}</span>
+              <button key={e.id} onClick={() => onSelect(e)} className="mb-2 flex w-full items-center gap-3 rounded-md border border-line bg-panel2 px-4 py-3 text-left hover:border-accent/50">
+                <span className="w-24 font-mono text-accent">{new Date(e.start).toLocaleTimeString(undefined, { timeZone: tz, hour: "2-digit", minute: "2-digit" })}</span>
+                <span className="rounded-md px-1.5 py-0.5 text-[11px] font-bold text-white" style={{ background: m?.color }}>{m?.short}</span>
                 <span className="flex-1 truncate">{e.title}</span>
                 <span className="text-sm text-mute">{Math.round((e.end - e.start) / 60000)} min</span>
                 {e.joined && <span className="chip !text-xs text-green">joining</span>}

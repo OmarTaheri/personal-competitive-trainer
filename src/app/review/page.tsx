@@ -30,7 +30,7 @@ export default async function ReviewPage({ searchParams }: { searchParams: Promi
     <div className="space-y-5">
       <div className="card card-pad flex flex-wrap items-center gap-4">
         <div className="flex-1">
-          <h1 className="text-3xl font-black">Weekly review</h1>
+          <h1 className="text-2xl font-semibold">Weekly review</h1>
           <p className="text-mute">{fmtDay(r.start)} – {fmtDay(r.end)}{r.isCurrent ? " · this week so far" : ""}</p>
         </div>
         <Link href={`/review?w=${w - 1}`} className="btn">← Previous week</Link>
@@ -38,15 +38,15 @@ export default async function ReviewPage({ searchParams }: { searchParams: Promi
       </div>
 
       {!r.total && !r.trained ? (
-        <div className="card card-pad py-16 text-center text-mute">No training this week{r.isCurrent ? " yet" : ""}. Press TRAIN NOW and it will show up here.</div>
+        <div className="card card-pad py-16 text-center text-mute">No training this week{r.isCurrent ? " yet" : ""}. Press Start training and it will show up here.</div>
       ) : (
         <>
           {/* headline numbers */}
           <div className="grid gap-4 md:grid-cols-4">
-            <Big label="Trained" value={fmtMinutes(r.trained)} sub={`of ${fmtMinutes(r.goal)} goal · ${pct}%`} color={pct >= 100 ? "#22c55e" : "#ff7a1a"} />
+            <Big label="Trained" value={fmtMinutes(r.trained)} sub={`of ${fmtMinutes(r.goal)} goal · ${pct}%`} color={pct >= 100 ? "#2e9d57" : "#2f6fde"} />
             <Big label="Goal days hit" value={`${r.daysHit} / ${r.days.filter((d) => !d.future).length}`} sub="days you reached the goal" />
             <Big label="Problems" value={String(r.total)} sub={`${r.newCount} new · ${r.total - r.newCount} re-solves`} />
-            <Big label="Solved alone" value={r.total ? `${Math.round((100 * (r.results.solved ?? 0)) / r.total)}%` : "—"} sub="of everything you tried" color="#22c55e" />
+            <Big label="Solved alone" value={r.total ? `${Math.round((100 * (r.results.solved ?? 0)) / r.total)}%` : "—"} sub="of everything you tried" color="#2e9d57" />
           </div>
 
           <div className="grid gap-5 xl:grid-cols-2">
@@ -57,8 +57,8 @@ export default async function ReviewPage({ searchParams }: { searchParams: Promi
                   <div key={d.date} className="flex h-full flex-1 flex-col items-center justify-end gap-1">
                     <div className="text-xs tabular-nums text-mute">{d.future ? "" : fmtMinutes(d.minutes)}</div>
                     <div className="relative w-full flex-1">
-                      <div className="absolute inset-x-0 border-t-2 border-dashed border-orange/50" style={{ bottom: `${(100 * d.goal) / maxMin}%` }} />
-                      <div className="absolute inset-x-1 bottom-0 rounded-t-lg" style={{ height: `${(100 * d.minutes) / maxMin}%`, background: d.minutes >= d.goal ? "#22c55e" : "#ff7a1a", opacity: d.future ? 0.2 : 1 }} />
+                      <div className="absolute inset-x-0 border-t-2 border-dashed border-accent/50" style={{ bottom: `${(100 * d.goal) / maxMin}%` }} />
+                      <div className="absolute inset-x-1 bottom-0 rounded-t-lg" style={{ height: `${(100 * d.minutes) / maxMin}%`, background: d.minutes >= d.goal ? "#2e9d57" : "#2f6fde", opacity: d.future ? 0.2 : 1 }} />
                     </div>
                     <div className="text-xs text-mute">{fmtDay(d.date).split(",")[0].split(" ")[0]}</div>
                   </div>
@@ -74,8 +74,8 @@ export default async function ReviewPage({ searchParams }: { searchParams: Promi
               </div>
               <div className="mt-4 grid grid-cols-3 gap-3">
                 {(["solved", "solved_help", "gave_up"] as const).map((k) => (
-                  <div key={k} className="rounded-2xl bg-panel2 p-3 text-center">
-                    <div className="text-3xl font-black" style={{ color: RESULT_COLOR[k] }}>{r.results[k] ?? 0}</div>
+                  <div key={k} className="rounded-md bg-panel2 p-3 text-center">
+                    <div className="text-3xl font-semibold" style={{ color: RESULT_COLOR[k] }}>{r.results[k] ?? 0}</div>
                     <div className="text-sm text-mute">{k === "solved" ? "Solved alone" : RESULT_LABEL[k]}</div>
                   </div>
                 ))}
@@ -86,8 +86,8 @@ export default async function ReviewPage({ searchParams }: { searchParams: Promi
             <Card title="Topics: this week vs the 4 weeks before">
               {!r.topics.length ? <Empty /> : (
                 <div className="grid gap-4 md:grid-cols-2">
-                  <TopicList title="📈 Got better" color="#22c55e" items={improved} empty="No big jumps yet." />
-                  <TopicList title="📉 Got worse" color="#ef4444" items={worse} empty="Nothing dropped. Nice." />
+                  <TopicList title="📈 Got better" color="#2e9d57" items={improved} empty="No big jumps yet." />
+                  <TopicList title="📉 Got worse" color="#d64545" items={worse} empty="Nothing dropped. Nice." />
                   {fresh.length > 0 && <div className="md:col-span-2 text-sm text-mute">New this week: {fresh.map((t) => `${t.name} (${t.score})`).join(", ")}</div>}
                   <div className="md:col-span-2 text-xs text-dim">Score = average result on that topic (alone 100, with help 50, gave up 0; lower if it felt hard or was slow). Changes of 10+ points are listed.</div>
                 </div>
@@ -102,12 +102,12 @@ export default async function ReviewPage({ searchParams }: { searchParams: Promi
                     {r.slowed.map(([id, n]) => (
                       <div key={id} className="flex items-center gap-3">
                         <span className="w-48 text-sm">{label(id)}</span>
-                        <div className="h-3 flex-1 overflow-hidden rounded-full bg-line"><div className="h-full rounded-full bg-orange" style={{ width: `${(100 * n) / r.slowed[0][1]}%` }} /></div>
+                        <div className="h-3 flex-1 overflow-hidden rounded-full bg-line"><div className="h-full rounded-full bg-accent" style={{ width: `${(100 * n) / r.slowed[0][1]}%` }} /></div>
                         <span className="w-8 text-right font-mono text-sm">{n}×</span>
                       </div>
                     ))}
                   </div>
-                  {top && <div className="mt-4 rounded-2xl border border-orange/40 bg-orange-soft p-3 text-sm"><b className="text-orange">Next week:</b> &ldquo;{label(top[0])}&rdquo; came up most ({top[1]}×). {TIP[top[0]] ?? ""}</div>}
+                  {top && <div className="mt-4 rounded-md border border-accent/40 bg-accent-soft p-3 text-sm"><b className="text-accent">Next week:</b> &ldquo;{label(top[0])}&rdquo; came up most ({top[1]}×). {TIP[top[0]] ?? ""}</div>}
                 </>
               )}
             </Card>
@@ -118,7 +118,7 @@ export default async function ReviewPage({ searchParams }: { searchParams: Promi
                 <div className="space-y-2">
                   {r.resolves.map((x, i) => (
                     <div key={i} className="flex items-center gap-3 rounded-xl bg-panel2 px-3 py-2 text-sm">
-                      <a href={x.url} target="_blank" rel="noreferrer" className="min-w-0 flex-1 truncate hover:text-orange">{x.title}</a>
+                      <a href={x.url} target="_blank" rel="noreferrer" className="min-w-0 flex-1 truncate hover:text-accent">{x.title}</a>
                       <span className="text-mute tabular-nums">{x.prevSec != null ? fmtDuration(x.prevSec) : "—"} → <b className="text-ink">{fmtDuration(x.nowSec)}</b></span>
                       <span className="w-20 text-right" style={{ color: RESULT_COLOR[x.result ?? ""] }}>{x.faster ? "⚡ faster" : "slower"}</span>
                     </div>
@@ -149,7 +149,7 @@ function Big({ label, value, sub, color }: { label: string; value: string; sub: 
   return (
     <div className="card card-pad">
       <div className="text-sm text-mute">{label}</div>
-      <div className="mt-1 text-3xl font-black tabular-nums" style={{ color }}>{value}</div>
+      <div className="mt-1 text-3xl font-semibold tabular-nums" style={{ color }}>{value}</div>
       <div className="text-xs text-dim">{sub}</div>
     </div>
   );

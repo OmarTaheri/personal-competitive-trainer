@@ -8,7 +8,7 @@ import { NEETCODE_TREE, NODE_H, NODE_W, TREE_H, TREE_W } from "@/lib/neetcodeTre
 export type NcItem = { id: number; pos: number; title: string; url: string; difficulty: string | null; solved: boolean; last: string | null | undefined };
 export type NcTopic = { name: string; items: NcItem[] };
 
-const GREEN = "#22c55e", ORANGE = "#ff7a1a";
+const GREEN = "#2e9d57", ORANGE = "#d99a00";
 
 export default function NeetcodeClient({ topics, nextId }: { topics: NcTopic[]; nextId: number | null }) {
   const [view, setView] = useState<"tree" | "list">("tree");
@@ -30,17 +30,17 @@ export default function NeetcodeClient({ topics, nextId }: { topics: NcTopic[]; 
     <div className="space-y-5">
       <div className="card card-pad flex flex-wrap items-center gap-8">
         <div>
-          <h1 className="text-3xl font-black">NeetCode 250</h1>
+          <h1 className="text-2xl font-semibold">NeetCode 250</h1>
           <p className="text-mute">Main track · served in this order · links open LeetCode</p>
         </div>
         <div className="min-w-48 flex-1">
           <div className="flex justify-between text-sm"><span className="text-mute">Overall</span><span className="font-mono">{done} / {all.length}</span></div>
-          <div className="mt-1 h-3 overflow-hidden rounded-full bg-line"><div className="h-full rounded-full bg-gradient-to-r from-orange to-green" style={{ width: `${(100 * done) / Math.max(1, all.length)}%` }} /></div>
+          <div className="mt-1 h-3 overflow-hidden rounded-full bg-line"><div className="h-full rounded-full bg-gradient-to-r from-accent to-green" style={{ width: `${(100 * done) / Math.max(1, all.length)}%` }} /></div>
         </div>
         {(["Easy", "Medium", "Hard"] as const).map((d) => { const s = byDiff(d); return <div key={d} className="text-center"><div className="text-sm" style={{ color: diffColor(d) }}>{d}</div><div className="font-mono text-xl font-bold">{s.solved}/{s.total}</div></div>; })}
         <div className="flex gap-1 rounded-xl border border-line p-1">
           {(["tree", "list"] as const).map((v) => (
-            <button key={v} onClick={() => pick(v)} className={`rounded-lg px-4 py-1.5 text-sm capitalize ${view === v ? "bg-orange font-semibold text-black" : "text-mute hover:text-ink"}`}>{v === "tree" ? "🌳 Tree" : "☰ List"}</button>
+            <button key={v} onClick={() => pick(v)} className={`rounded-lg px-4 py-1.5 text-sm capitalize ${view === v ? "bg-accent font-semibold text-white" : "text-mute hover:text-ink"}`}>{v === "tree" ? "🌳 Tree" : "☰ List"}</button>
           ))}
         </div>
       </div>
@@ -69,17 +69,17 @@ function TreeView({ topics, solved, nextId, toggle }: { topics: NcTopic[]; solve
 
   return (
     <div className="grid gap-5 xl:grid-cols-[1fr_440px]">
-      <div className="card grid-bg overflow-hidden p-4">
+      <div className="card  overflow-hidden p-4">
         <div className="mb-2 flex flex-wrap items-center gap-4 px-2 text-xs text-mute">
           <span>Arrows point to what comes next. Finish a topic&apos;s prerequisites first.</span>
           <span className="flex items-center gap-1.5"><i className="h-2.5 w-2.5 rounded-sm bg-green" />done</span>
-          <span className="flex items-center gap-1.5"><i className="h-2.5 w-2.5 rounded-sm bg-orange" />in progress</span>
+          <span className="flex items-center gap-1.5"><i className="h-2.5 w-2.5 rounded-sm bg-amber" />in progress</span>
           <span className="flex items-center gap-1.5"><i className="h-2.5 w-2.5 rounded-sm border border-dashed border-dim" />do prerequisites first</span>
         </div>
         <svg viewBox={`0 0 ${TREE_W} ${TREE_H}`} className="h-auto w-full">
           <defs>
             <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-              <path d="M0 0 L10 5 L0 10 z" fill="#4b5563" />
+              <path d="M0 0 L10 5 L0 10 z" fill="#d0d0cc" />
             </marker>
             <marker id="arrowOn" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
               <path d="M0 0 L10 5 L0 10 z" fill={GREEN} />
@@ -92,24 +92,24 @@ function TreeView({ topics, solved, nextId, toggle }: { topics: NcTopic[]; solve
             const x1 = a.x, y1 = a.y + NODE_H / 2, x2 = n.x, y2 = n.y - NODE_H / 2 - 3;
             const my = (y1 + y2) / 2;
             const on = stat(p).complete;
-            return <path key={`${p}-${n.topic}`} d={`M${x1} ${y1} C${x1} ${my} ${x2} ${my} ${x2} ${y2}`} fill="none" stroke={on ? GREEN : "#3a3a44"} strokeWidth={on ? 2.5 : 2} markerEnd={on ? "url(#arrowOn)" : "url(#arrow)"} opacity={on ? 0.9 : 1} />;
+            return <path key={`${p}-${n.topic}`} d={`M${x1} ${y1} C${x1} ${my} ${x2} ${my} ${x2} ${y2}`} fill="none" stroke={on ? GREEN : "#d0d0cc"} strokeWidth={on ? 2.5 : 2} markerEnd={on ? "url(#arrowOn)" : "url(#arrow)"} opacity={on ? 0.9 : 1} />;
           }))}
           {/* nodes */}
           {NEETCODE_TREE.map((n) => {
             const s = stat(n.topic);
             const locked = missing(n.topic).length > 0 && s.n === 0;
-            const color = s.complete ? GREEN : s.n > 0 ? ORANGE : "#6b7280";
+            const color = s.complete ? GREEN : s.n > 0 ? ORANGE : "#9a9ea5";
             const isNext = n.topic === nextTopic, isSel = n.topic === sel;
             const x = n.x - NODE_W / 2, y = n.y - NODE_H / 2;
             return (
               <g key={n.topic} onClick={() => setSel(n.topic)} className="cursor-pointer" opacity={locked ? 0.55 : 1}>
                 {isNext && <rect x={x - 4} y={y - 4} width={NODE_W + 8} height={NODE_H + 8} rx={18} fill={ORANGE} opacity={0.45} filter="url(#glow)" />}
-                <rect x={x} y={y} width={NODE_W} height={NODE_H} rx={14} fill={s.complete ? "#0f2016" : "#16161b"}
-                  stroke={isSel ? "#f4f4f5" : color} strokeWidth={isSel ? 2.5 : 1.8} strokeDasharray={locked ? "6 5" : undefined} />
-                <text x={n.x} y={y + 25} textAnchor="middle" fontSize="15" fontWeight="700" fill="#f4f4f5">{n.short ?? n.topic}</text>
-                <rect x={x + 16} y={y + 40} width={NODE_W - 70} height={7} rx={3.5} fill="#26262e" />
+                <rect x={x} y={y} width={NODE_W} height={NODE_H} rx={14} fill={s.complete ? "#e9f5ee" : "#f0f0ed"}
+                  stroke={isSel ? "#1f2328" : color} strokeWidth={isSel ? 2.5 : 1.8} strokeDasharray={locked ? "6 5" : undefined} />
+                <text x={n.x} y={y + 25} textAnchor="middle" fontSize="15" fontWeight="700" fill="#1f2328">{n.short ?? n.topic}</text>
+                <rect x={x + 16} y={y + 40} width={NODE_W - 70} height={7} rx={3.5} fill="#e3e3df" />
                 <rect x={x + 16} y={y + 40} width={(NODE_W - 70) * (s.total ? s.n / s.total : 0)} height={7} rx={3.5} fill={color} />
-                <text x={x + NODE_W - 14} y={y + 48} textAnchor="end" fontSize="12" fill="#9ca3af" fontFamily="monospace">{s.n}/{s.total}</text>
+                <text x={x + NODE_W - 14} y={y + 48} textAnchor="end" fontSize="12" fill="#6b6f76" fontFamily="monospace">{s.n}/{s.total}</text>
                 {s.complete && <text x={x + NODE_W - 12} y={y + 20} textAnchor="end" fontSize="14" fill={GREEN}>✓</text>}
                 <title>{locked ? `Do first: ${missing(n.topic).join(", ")}` : n.topic}</title>
               </g>
@@ -127,7 +127,7 @@ function TreeView({ topics, solved, nextId, toggle }: { topics: NcTopic[]; solve
                 <span className="font-mono text-sm text-mute">{stat(selTopic.name).n}/{stat(selTopic.name).total}</span>
               </div>
               {missing(selTopic.name).length > 0 ? (
-                <div className="mt-1 text-sm text-orange">Do first: {missing(selTopic.name).join(", ")}</div>
+                <div className="mt-1 text-sm text-accent">Do first: {missing(selTopic.name).join(", ")}</div>
               ) : (
                 <div className="mt-1 text-sm text-mute">
                   {(pos.get(selTopic.name)?.parents.length ?? 0) ? `Unlocked by ${pos.get(selTopic.name)!.parents.join(", ")}` : "Start here"}
@@ -197,13 +197,13 @@ function Topic({ t, open, onToggle, solved, nextId, toggle }: { t: NcTopic; open
 
 function Row({ i, solved, next, toggle }: { i: NcItem; solved: boolean; next: boolean; toggle: (id: number) => void }) {
   return (
-    <div className={`flex items-center gap-3 border-b border-[#1f1f26] px-5 py-2.5 last:border-0 ${next ? "bg-orange-soft" : ""}`}>
+    <div className={`flex items-center gap-3 border-b border-[#efefec] px-5 py-2.5 last:border-0 ${next ? "bg-accent-soft" : ""}`}>
       <button title={solved ? "Marked solved, click to unmark" : "Mark as solved"} onClick={() => toggle(i.id)}
-        className={`grid h-6 w-6 shrink-0 place-items-center rounded-md border text-xs ${solved ? "border-green bg-green text-black" : "border-line text-transparent hover:border-green/60"}`}>✓</button>
+        className={`grid h-6 w-6 shrink-0 place-items-center rounded-md border text-xs ${solved ? "border-green bg-green text-white" : "border-line text-transparent hover:border-green/60"}`}>✓</button>
       <span className="w-8 text-right font-mono text-xs text-dim">{i.pos}</span>
-      <a href={i.url} target="_blank" rel="noreferrer" className="min-w-0 flex-1 truncate hover:text-orange">{i.title}</a>
-      {next && <span className="chip !text-xs text-orange">next</span>}
-      {i.last !== undefined && <span className="h-2 w-2 rounded-full" title={RESULT_LABEL[i.last ?? ""]} style={{ background: RESULT_COLOR[i.last ?? ""] ?? "#6b7280" }} />}
+      <a href={i.url} target="_blank" rel="noreferrer" className="min-w-0 flex-1 truncate hover:text-accent">{i.title}</a>
+      {next && <span className="chip !text-xs text-accent">next</span>}
+      {i.last !== undefined && <span className="h-2 w-2 rounded-full" title={RESULT_LABEL[i.last ?? ""]} style={{ background: RESULT_COLOR[i.last ?? ""] ?? "#9a9ea5" }} />}
       <span className="w-16 text-right text-xs" style={{ color: diffColor(i.difficulty) }}>{i.difficulty}</span>
       <TrainThis id={i.id} url={i.url} />
     </div>

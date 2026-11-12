@@ -2,8 +2,8 @@
 
 import { Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
-const tip = { contentStyle: { background: "#1b1b21", border: "1px solid #26262e", borderRadius: 12, color: "#f4f4f5" }, labelStyle: { color: "#9ca3af" }, cursor: { fill: "#ffffff08" } };
-const STATUS_COLOR: Record<string, string> = { strong: "#22c55e", learning: "#ff7a1a", weak: "#ef4444", new: "#6b7280" };
+const tip = { contentStyle: { background: "#ffffff", border: "1px solid #e3e3df", borderRadius: 6, color: "#1f2328", fontSize: 12 }, labelStyle: { color: "#6b6f76" }, cursor: { fill: "#efefec" } };
+const STATUS_COLOR: Record<string, string> = { strong: "#2e9d57", learning: "#d99a00", weak: "#d64545", new: "#9a9ea5" };
 
 export default function StatsCharts({ series, byRating, phases, slowed, mastery }: {
   series: { date: string; minutes: number; solved: number }[];
@@ -13,20 +13,20 @@ export default function StatsCharts({ series, byRating, phases, slowed, mastery 
   mastery: { name: string; score: number; attempts: number; status: string }[];
 }) {
   const phaseData = [
-    { name: "Thinking", value: Math.round(phases.think / 60), color: "#60a5fa" },
-    { name: "Stuck", value: Math.round(phases.stuck / 60), color: "#ef4444" },
-    { name: "Coding", value: Math.round(phases.code / 60), color: "#22c55e" },
+    { name: "Thinking", value: Math.round(phases.think / 60), color: "#2f6fde" },
+    { name: "Stuck", value: Math.round(phases.stuck / 60), color: "#d64545" },
+    { name: "Coding", value: Math.round(phases.code / 60), color: "#2e9d57" },
   ];
   return (
     <div className="grid gap-6 xl:grid-cols-2">
       <Card title="Minutes per day (90 days)">
         <ResponsiveContainer width="100%" height={260}>
           <BarChart data={series} margin={{ left: -18 }}>
-            <CartesianGrid stroke="#ffffff10" vertical={false} />
-            <XAxis dataKey="date" tickFormatter={(d: string) => d.slice(5)} stroke="#6b7280" fontSize={11} minTickGap={24} tickLine={false} axisLine={false} />
-            <YAxis stroke="#6b7280" fontSize={11} tickLine={false} axisLine={false} />
+            <CartesianGrid stroke="#e3e3df" vertical={false} />
+            <XAxis dataKey="date" tickFormatter={(d: string) => d.slice(5)} stroke="#9a9ea5" fontSize={11} minTickGap={24} tickLine={false} axisLine={false} />
+            <YAxis stroke="#9a9ea5" fontSize={11} tickLine={false} axisLine={false} />
             <Tooltip {...tip} />
-            <Bar dataKey="minutes" fill="#ff7a1a" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="minutes" fill="#2f6fde" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </Card>
@@ -34,14 +34,14 @@ export default function StatsCharts({ series, byRating, phases, slowed, mastery 
       <Card title="Results by rating (Codeforces scale)">
         <ResponsiveContainer width="100%" height={260}>
           <BarChart data={byRating} margin={{ left: -18 }}>
-            <CartesianGrid stroke="#ffffff10" vertical={false} />
-            <XAxis dataKey="rating" stroke="#6b7280" fontSize={11} tickLine={false} axisLine={false} />
-            <YAxis stroke="#6b7280" fontSize={11} tickLine={false} axisLine={false} allowDecimals={false} />
+            <CartesianGrid stroke="#e3e3df" vertical={false} />
+            <XAxis dataKey="rating" stroke="#9a9ea5" fontSize={11} tickLine={false} axisLine={false} />
+            <YAxis stroke="#9a9ea5" fontSize={11} tickLine={false} axisLine={false} allowDecimals={false} />
             <Tooltip {...tip} />
             <Legend wrapperStyle={{ fontSize: 12 }} />
-            <Bar dataKey="solved" name="Solved" stackId="a" fill="#22c55e" />
-            <Bar dataKey="help" name="With help" stackId="a" fill="#f5b301" />
-            <Bar dataKey="gaveUp" name="Gave up" stackId="a" fill="#ef4444" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="solved" name="Solved" stackId="a" fill="#2e9d57" />
+            <Bar dataKey="help" name="With help" stackId="a" fill="#d99a00" />
+            <Bar dataKey="gaveUp" name="Gave up" stackId="a" fill="#d64545" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </Card>
@@ -52,7 +52,7 @@ export default function StatsCharts({ series, byRating, phases, slowed, mastery 
             {mastery.map((m) => (
               <div key={m.name} className="flex items-center gap-3">
                 <span className="w-48 truncate text-sm">{m.name}</span>
-                <div className="h-3 flex-1 overflow-hidden rounded-full bg-line"><div className="h-full rounded-full" style={{ width: `${m.score}%`, background: STATUS_COLOR[m.status] }} /></div>
+                <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-line"><div className="h-full rounded-full" style={{ width: `${m.score}%`, background: STATUS_COLOR[m.status] }} /></div>
                 <span className="w-10 text-right font-mono text-sm" style={{ color: STATUS_COLOR[m.status] }}>{m.score}</span>
                 <span className="w-12 text-right text-xs text-dim">{m.attempts}×</span>
               </div>
@@ -80,9 +80,9 @@ export default function StatsCharts({ series, byRating, phases, slowed, mastery 
             <ResponsiveContainer width="100%" height={260}>
               <BarChart data={slowed} layout="vertical" margin={{ left: 40 }}>
                 <XAxis type="number" hide allowDecimals={false} />
-                <YAxis type="category" dataKey="name" stroke="#9ca3af" fontSize={11} width={110} tickLine={false} axisLine={false} />
+                <YAxis type="category" dataKey="name" stroke="#6b6f76" fontSize={11} width={110} tickLine={false} axisLine={false} />
                 <Tooltip {...tip} />
-                <Bar dataKey="value" fill="#ff7a1a" radius={[0, 4, 4, 0]} />
+                <Bar dataKey="value" fill="#2f6fde" radius={[0, 4, 4, 0]} />
               </BarChart>
             </ResponsiveContainer>
           ) : <Empty />}
@@ -93,7 +93,7 @@ export default function StatsCharts({ series, byRating, phases, slowed, mastery 
 }
 
 function Card({ title, children }: { title: string; children: React.ReactNode }) {
-  return <div className="card card-pad"><div className="mb-3 font-semibold">{title}</div>{children}</div>;
+  return <div className="card card-pad"><div className="eyebrow mb-3">{title}</div>{children}</div>;
 }
 
 function Empty() {

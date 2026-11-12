@@ -1,4 +1,8 @@
+import { and, desc, eq, gte } from "drizzle-orm";
+import { getDb, schema } from "@/db";
 import type { Attempt, Problem } from "@/db/schema";
+import { startOfDayMs } from "@/lib/time";
+import { conceptKeys, type ConceptKey } from "./home";
 import { CONCEPT_BY_ID } from "@/lib/concepts";
 import { TRACK_LABEL } from "@/lib/ui";
 import { leetcodeHints } from "@/lib/adapters/leetcode";
@@ -29,6 +33,10 @@ export type TrainView = {
   suggestions: Suggestion[];
   reveal: Reveal;
   images: string[];
+  /** Concept keyboard data. */
+  keys: ConceptKey[];
+  /** Problem you finished most recently today (already revealed), to highlight its concepts. Null while an attempt is open. */
+  last: { title: string; concepts: string[] } | null;
   serverNow: number;
 };
 
@@ -98,6 +106,8 @@ export function trainView(): TrainView {
     suggestions,
     reveal: a && a.status === "feedback" ? revealFor(a) : null,
     images: a ? imagesFor([a.id]).get(a.id) ?? [] : [],
+    keys: conceptKeys(),
+    last: a ? null : lastFinished(startOfDayMs(date, s.timezone)),
     serverNow: Date.now(),
   };
 }
@@ -129,4 +139,13 @@ export async function helpContent(problemId: number, level: "hint" | "editorial"
   if (p.platform === "cses") links.push({ label: "USACO Guide search", url: `https://www.google.com/search?q=${encodeURIComponent(`CSES ${p.title} solution usaco guide`)}` });
   links.push({ label: "Search editorial", url: `https://www.google.com/search?q=${q}` });
   return { kind: "editorial", hints: [], links };
+}
+
+function lastFinished(since: number): TrainView["last"] {
+  const last = getDb().select().from(schema.attempts)
+    .where(and(eq(schema.attempts.status, "done"), gte(schema.attempts.startedAt, since)))
+    .orderBy(desc(schema.attempts.endedAt)).limit(1).get();
+  if (!last) return null;
+  const p = getProblem(last.problemId);
+  return p ? { title: p.title, concepts: conceptsOf([p.id]).get(p.id) ?? [] } : null;
 }
